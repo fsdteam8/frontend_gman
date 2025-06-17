@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Minus, Plus, X, ShoppingBag } from "lucide-react"
+import { Minus, Plus, X, ShoppingBag,  } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
+import Link from "next/link"
 
 interface CartItem {
   _id: string
@@ -330,8 +331,9 @@ const updateCartItem = async ({ productId, quantity }: { productId: string; quan
                 <span>Total</span>
                 <span>${cart?.total.toFixed(2)}</span>
               </div>
-
+                <Link href="/checkout" >
               <Button className="w-full bg-green-600 hover:bg-green-700 text-white">Continue Shopping</Button>
+                </Link>
             </CardContent>
           </Card>
         </div>

@@ -11,10 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-
 import { useState } from "react";
-
-
 
 // Define TypeScript interfaces for the API response
 interface Category {
@@ -43,10 +40,8 @@ export default function Searchbar() {
   const session = useSession();
   const token = session?.data?.accessToken;
 
- 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
 
   const fetchCategories = async (): Promise<Category[]> => {
     if (!token) {
@@ -77,7 +72,6 @@ export default function Searchbar() {
     queryFn: fetchCategories,
   });
 
-
   const handleSearch = () => {
     const params = new URLSearchParams();
 
@@ -92,13 +86,11 @@ export default function Searchbar() {
     window.history.pushState(null, "", newUrl);
   };
 
-  // Handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
     }
   };
-
 
   return (
     <div className="max-w-5xl px-2 sm:px-4 md:px-6 lg:px-8">
@@ -117,7 +109,7 @@ export default function Searchbar() {
                   placeholder="Search destinations"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown} // Add onKeyDown handler
+                  onKeyDown={handleKeyDown}
                   className="pl-7 sm:pl-10 md:pl-12 border-0 text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-12 w-full"
                 />
               </div>
@@ -169,4 +161,4 @@ export default function Searchbar() {
       </div>
     </div>
   );
-
+}

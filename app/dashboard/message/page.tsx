@@ -308,13 +308,13 @@ export default function FarmMessagesPage() {
     if (token) {
       fetchUserProfile();
     }
-  }, [token]);
+  }, [token,fetchUserProfile]);
 
   useEffect(() => {
     if (currentUser?.farm) {
       fetchChats();
     }
-  }, [currentUser?.farm, token]);
+  }, [currentUser?.farm, token,fetchChats]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
