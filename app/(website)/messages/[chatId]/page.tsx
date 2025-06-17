@@ -271,7 +271,7 @@ export default function ChatPage() {
       fetchUserProfile();
       fetchChatDetails();
     }
-  }, [token, chatId]);
+  }, [token, chatId,fetchChatDetails,fetchUserProfile]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);

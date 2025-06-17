@@ -305,7 +305,7 @@ export default function MessagesPage() {
       fetchUserProfile();
       fetchChats();
     }
-  }, [token]);
+  }, [token,fetchChats, fetchUserProfile]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);

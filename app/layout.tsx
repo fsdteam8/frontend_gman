@@ -4,6 +4,7 @@ import "./globals.css";
 import AppProvider from "@/provider/AppProvider";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/sheard/session-provider";
+import StripeProvider from "@/components/sheard/StripeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,12 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased bg-[#efefef]`}>
-        <Providers>
-          <AppProvider>
-            {children}
-            <Toaster />
-          </AppProvider>
-        </Providers>
+        <StripeProvider>
+          <Providers>
+            <AppProvider>
+              {children}
+              <Toaster />
+            </AppProvider>
+          </Providers>
+        </StripeProvider>
       </body>
     </html>
   );
