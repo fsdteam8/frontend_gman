@@ -268,18 +268,8 @@ export default function BlogDetails() {
             </div>
           </div>
 
-          {/* Blog metadata */}
-          <div className="border-t pt-6 mt-8">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-sm text-gray-500">
-              <div>
-                <p>Created: {formatDate(blog.createdAt)}</p>
-                {blog.updatedAt !== blog.createdAt && <p>Updated: {formatDate(blog.updatedAt)}</p>}
-              </div>
-              <div>
-                <p>Blog ID: {blog._id}</p>
-              </div>
-            </div>
-          </div>
+   
+         
 
           {/* Back to blog link */}
           <div className="mt-8 pt-6 border-t">
