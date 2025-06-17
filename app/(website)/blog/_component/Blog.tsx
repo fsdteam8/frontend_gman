@@ -1,50 +1,50 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useSession } from "next-auth/react"
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 // Types
 interface BlogThumbnail {
-  public_id: string
-  url: string
+  public_id: string;
+  url: string;
 }
 
 interface Blog {
-  _id: string
-  blogName: string
-  description: string
-  thumbnail: BlogThumbnail
-  createdAt: string
-  updatedAt: string
+  _id: string;
+  blogName: string;
+  description: string;
+  thumbnail: BlogThumbnail;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface BlogsResponse {
-  success: boolean
+  success: boolean;
   data: {
-    blogs: Blog[]
+    blogs: Blog[];
     pagination: {
-      total: number
-      page: number
-      limit: number
-      totalPage: number
-    }
-  }
+      total: number;
+      page: number;
+      limit: number;
+      totalPage: number;
+    };
+  };
 }
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  totalItems: number
-  itemsPerPage: number
-  onPageChange: (page: number) => void
-  showingFrom: number
-  showingTo: number
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  showingFrom: number;
+  showingTo: number;
 }
 
 // Pagination Component (inline)
@@ -58,41 +58,41 @@ const Pagination = ({
   showingTo,
 }: PaginationProps) => {
   const getVisiblePages = () => {
-    const pages = []
-    const maxVisiblePages = 7
+    const pages = [];
+    const maxVisiblePages = 7;
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
+        pages.push(i);
       }
     } else {
       if (currentPage <= 4) {
         for (let i = 1; i <= 5; i++) {
-          pages.push(i)
+          pages.push(i);
         }
-        pages.push("...")
-        pages.push(totalPages)
+        pages.push("...");
+        pages.push(totalPages);
       } else if (currentPage >= totalPages - 3) {
-        pages.push(1)
-        pages.push("...")
+        pages.push(1);
+        pages.push("...");
         for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i)
+          pages.push(i);
         }
       } else {
-        pages.push(1)
-        pages.push("...")
+        pages.push(1);
+        pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i)
+          pages.push(i);
         }
-        pages.push("...")
-        pages.push(totalPages)
+        pages.push("...");
+        pages.push(totalPages);
       }
     }
 
-    return pages
-  }
+    return pages;
+  };
 
-  const visiblePages = getVisiblePages()
+  const visiblePages = getVisiblePages();
 
   return (
     <div className="flex items-center justify-between mt-8">
@@ -121,7 +121,9 @@ const Pagination = ({
                 size="sm"
                 onClick={() => onPageChange(page as number)}
                 className={`h-8 w-8 p-0 ${
-                  currentPage === page ? "bg-green-600 hover:bg-green-700 text-white" : "hover:bg-gray-50"
+                  currentPage === page
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : "hover:bg-gray-50"
                 }`}
               >
                 {page}
@@ -141,49 +143,53 @@ const Pagination = ({
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Main Blog Component
 export default function BlogWithPagination() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const session = useSession()
-  const token= session.data?.accessToken
-  const limit = 10 // Show 6 blogs per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const session = useSession();
+  const token = session.data?.accessToken;
+  const limit = 10; // Show 6 blogs per page
 
   // Get token from localStorage on component mount
 
-
   // API fetch function with authentication
-  const fetchBlogs = async (page: number, limit: number): Promise<BlogsResponse> => {
+  const fetchBlogs = async (
+    page: number,
+    limit: number
+  ): Promise<BlogsResponse> => {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
-      Authorization : `Bearer ${token}`,
-    }
+      Authorization: `Bearer ${token}`,
+    };
 
     // Add authorization header if token exists
-  
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/blogs?page=1&limit=${limit}`, {
-      method: "GET",
-      headers,
-    })
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/admin/blogs?page=1&limit=${limit}`,
+      {
+        method: "GET",
+        headers,
+      }
+    );
 
     // Handle unauthorized responses
     if (response.status === 401) {
       // Token might be expired, remove it
-      localStorage.removeItem("authToken")
-      localStorage.removeItem("token")
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("token");
 
-      throw new Error("Unauthorized - Please login again")
+      throw new Error("Unauthorized - Please login again");
     }
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json()
-  }
+    return response.json();
+  };
 
   // TanStack Query hook
   const { data, isLoading, error, refetch } = useQuery({
@@ -194,46 +200,45 @@ export default function BlogWithPagination() {
     retry: (failureCount, error) => {
       // Don't retry on 401 errors (unauthorized)
       if (error.message.includes("Unauthorized")) {
-        return false
+        return false;
       }
-      return failureCount < 3
+      return failureCount < 3;
     },
-  })
+  });
 
   // Format date function
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
+    setCurrentPage(page);
     // Scroll to top when page changes
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Handle token update (you can call this function to set token)
   const updateToken = (newToken: string | null) => {
     if (newToken) {
-      localStorage.setItem("authToken", newToken)
+      localStorage.setItem("authToken", newToken);
     } else {
-      localStorage.removeItem("authToken")
-      localStorage.removeItem("token")
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("token");
     }
-
-  }
+  };
 
   // Handle logout
   const handleLogout = () => {
-    updateToken(null)
+    updateToken(null);
     // Optionally redirect to login page
     // window.location.href = "/login"
-  }
+  };
 
   // Show login prompt if no token
   if (!token) {
@@ -246,9 +251,9 @@ export default function BlogWithPagination() {
             <Button
               onClick={() => {
                 // Example: Set a demo token
-                const demoToken = prompt("Enter your auth token:")
+                const demoToken = prompt("Enter your auth token:");
                 if (demoToken) {
-                  updateToken(demoToken)
+                  updateToken(demoToken);
                 }
               }}
             >
@@ -257,7 +262,7 @@ export default function BlogWithPagination() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   // Show error state
@@ -265,7 +270,9 @@ export default function BlogWithPagination() {
     return (
       <div className="container mx-auto px-4 py-8 mt-[100px]">
         <div className="text-center">
-          <div className="text-red-600 mb-4">Error loading blogs: {error.message}</div>
+          <div className="text-red-600 mb-4">
+            Error loading blogs: {error.message}
+          </div>
           <div className="space-x-4">
             <Button onClick={() => refetch()}>Retry</Button>
             <Button variant="outline" onClick={handleLogout}>
@@ -274,12 +281,11 @@ export default function BlogWithPagination() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 mt-[100px]">
-     
       {isLoading ? (
         // Loading skeleton
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -312,9 +318,16 @@ export default function BlogWithPagination() {
                   />
                 </div>
                 <div className="flex flex-col flex-1">
-                  <div className="text-base font-normal text-[#595959] mb-1">{formatDate(post.createdAt)}</div>
-                  <h3 className="text-[18px] font-semibold text-[#272727] mb-2">{post.blogName}</h3>
-                  <p className="text-sm text-[#4B5563] mb-3 line-clamp-2">{post.description}</p>
+                  <div className="text-base font-normal text-[#595959] mb-1">
+                    {formatDate(post.createdAt)}
+                  </div>
+                  <h3 className="text-[18px] font-semibold text-[#272727] mb-2">
+                    {post.blogName}
+                  </h3>
+                 <div className="list-item list-none">
+  {(post?.description ?? "Blog Description").replace(/<[^>]+>/g, '').slice(0, 65)}...
+</div>
+
                   <div className="mt-auto">
                     <Link
                       href={`/red-blog/${post._id}`}
@@ -336,12 +349,17 @@ export default function BlogWithPagination() {
               totalItems={data.data.pagination.total}
               itemsPerPage={data.data.pagination.limit}
               onPageChange={handlePageChange}
-              showingFrom={(data.data.pagination.page - 1) * data.data.pagination.limit + 1}
-              showingTo={Math.min(data.data.pagination.page * data.data.pagination.limit, data.data.pagination.total)}
+              showingFrom={
+                (data.data.pagination.page - 1) * data.data.pagination.limit + 1
+              }
+              showingTo={Math.min(
+                data.data.pagination.page * data.data.pagination.limit,
+                data.data.pagination.total
+              )}
             />
           )}
         </>
       )}
     </div>
-  )
+  );
 }
