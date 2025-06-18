@@ -5,6 +5,17 @@ import Image from "next/image"
 import Link from "next/link"
 import { Heart, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useQuery } from "@tanstack/react-query"
+
+interface Farm {
+  _id: string
+  name: string
+  images: { url: string }[]
+  location: { city: string; zipCode: string }
+  description: string
+  isOrganic: boolean
+  review: { rating: number }[]
+}
 
 interface Product {
   id: string
@@ -18,95 +29,59 @@ interface Product {
   inStock: boolean
 }
 
-const dummyProducts: Product[] = [
-  {
-    id: "1",
-    name: "Fresh Strawberries",
-    image: "/asset/product1.png",
-    distance: "2.5 kilometers away",
-    availability: "Available all year",
-    price: "$25 per box",
-    rating: 4.8,
-    reviews: 98,
-    inStock: true,
-  },
-  {
-    id: "2",
-    name: "Organic Apples",
-    image: "/asset/product1.png",
-    distance: "1.2 kilometers away",
-    availability: "Available all year",
-    price: "$18 per box",
-    rating: 4.6,
-    reviews: 156,
-    inStock: true,
-  },
-  {
-    id: "3",
-    name: "Fresh Vegetables Mix",
-     image: "/asset/product1.png",
-    distance: "3.1 kilometers away",
-    availability: "Available seasonally",
-    price: "$32 per box",
-    rating: 4.9,
-    reviews: 87,
-    inStock: false,
-  },
-  {
-    id: "4",
-    name: "Garden Fresh Herbs",
-    image: "/asset/product1.png",
-    distance: "0.8 kilometers away",
-    availability: "Available all year",
-    price: "$15 per bundle",
-    rating: 4.7,
-    reviews: 124,
-    inStock: true,
-  },
-  {
-    id: "5",
-    name: "Organic Lettuce",
-     image: "/asset/product1.png",
-    distance: "2.0 kilometers away",
-    availability: "Available all year",
-    price: "$12 per head",
-    rating: 4.5,
-    reviews: 203,
-    inStock: true,
-  },
-  {
-    id: "6",
-    name: "Fresh Tomatoes",
-    image: "/asset/product1.png",
-    distance: "1.5 kilometers away",
-    availability: "Available seasonally",
-    price: "$22 per box",
-    rating: 4.8,
-    reviews: 167,
-    inStock: true,
-  },
- 
-]
+const fetchFarms = async (): Promise<Farm[]> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all-farm`)
+  const data = await response.json()
+  if (!data.success) throw new Error(data.message)
+  return data.data.farm
+}
 
 export default function FutureProduct() {
   const [favorites, setFavorites] = useState<string[]>([])
 
+  const { data: farms, isLoading, error } = useQuery<Farm[]>({
+    queryKey: ["farms"],
+    queryFn: fetchFarms,
+  })
+
   const toggleFavorite = (productId: string) => {
-    setFavorites((prev) => (prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]))
+    setFavorites((prev) => 
+      prev.includes(productId) 
+        ? prev.filter((id) => id !== productId) 
+        : [...prev, productId]
+    )
   }
+
+  // Transform farm data into product format
+  const products: Product[] = farms?.map((farm) => ({
+    id: farm._id,
+    name: farm.name,
+    image: farm.images[0]?.url || "/placeholder.svg",
+    distance: `${farm.location.city}, ${farm.location.zipCode}`,
+    availability: farm.isOrganic ? "Organic Certified" : "Conventional",
+    price: "$20 per box", // Placeholder as API doesn't provide price
+    rating: farm.review.length > 0 
+      ? farm.review.reduce((acc, curr) => acc + curr.rating, 0) / farm.review.length 
+      : 4.5,
+    reviews: farm.review.length,
+    inStock: true, // Placeholder as API doesn't provide stock status
+  })) || []
+
+  if (isLoading) return <div className="container mx-auto px-4 py-8">Loading...</div>
+  if (error) return <div className="container mx-auto px-4 py-8">Error: {error.message}</div>
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-6 text-gray-900">Featured Products</h2>
 
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-6 gap-y-10">
-        {dummyProducts.map((product) => (
+        {products.map((product) => (
           <Link key={product.id} href={`/product-details/${product.id}`}>
             <div className="group cursor-pointer relative overflow-hidden">
               <div className="relative">
                 <div className="aspect-square overflow-hidden rounded-lg">
                   <Image
-                    src={product.image || "/placeholder.svg"}
+                    src={product.image}
                     alt={product.name}
                     width={200}
                     height={200}
@@ -146,7 +121,7 @@ export default function FutureProduct() {
                   <span className="font-semibold text-xs sm:text-sm text-[#111827]">{product.price}</span>
                   <div className="flex items-center gap-1">
                     <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#FACC15] text-[#FACC15]" />
-                    <span className="text-xs sm:text-sm font-medium text-gray-900">{product.rating}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-900">{product.rating.toFixed(1)}</span>
                     <span className="text-xs sm:text-sm text-gray-600">({product.reviews})</span>
                   </div>
                 </div>

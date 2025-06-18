@@ -79,7 +79,7 @@ export function DashboardSidebar() {
           />
           <div className="flex flex-col">
             <div className="">
-              <p className="text-[16px] font-semibold text-black">TABLE</p>
+              <p className="text-[16px] font-semibold text-white">TABLE</p>
               <p className="text-[16px] font-normal text-[#039B06]">FRESH</p>
             </div>
             <span className="text-[6px] font-medium leading-[120%] space-x-[5%] text-[#8F8F8F]">Fresh & Healthy</span>
