@@ -1061,7 +1061,7 @@ function CheckoutContent() {
         {/* Payment Modal */}
         {userData && (cartData || (productData && productId)) && serviceId && (
           <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-            <DialogContent className="w-[825px]">
+            <DialogContent className="!w-[1005px]">
               <DialogHeader>
                 <DialogTitle>Payment Details</DialogTitle>
               </DialogHeader>
