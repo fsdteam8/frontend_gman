@@ -1,7 +1,8 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { BarChart3, Package, ShoppingCart, MessageSquare, TrendingUp, LogOut, PackageSearch } from "lucide-react"
+import { signOut } from "next-auth/react"
+import { BarChart3, Package, ShoppingCart, MessageSquare, TrendingUp, LogOut, PackageSearch,Settings } from "lucide-react"
 
 import {
   Sidebar,
@@ -52,6 +53,12 @@ const sidebarItems = [
     icon: TrendingUp,
     href: "/dashboard/my-sales",
   },
+  {
+    id: "settings",
+    label: "Settings",
+    icon: Settings ,
+    href: "/dashboard/settings",
+  },
 ]
 
 export function DashboardSidebar() {
@@ -63,6 +70,11 @@ export function DashboardSidebar() {
       return pathname === "/dashboard"
     }
     return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false })
+    router.push("/login")
   }
 
   return (
@@ -107,7 +119,10 @@ export function DashboardSidebar() {
       <SidebarFooter className="p- !bg-[#014A14]">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="text-white hover:bg-green-600 h-[50px] hover:text-white font-normal text-[18px] my-4 cursor-pointer">
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="text-white hover:bg-green-600 h-[50px] hover:text-white font-normal text-[18px] my-4 cursor-pointer"
+            >
               <LogOut className="h-4 w-4" />
               <span>Log Out</span>
             </SidebarMenuButton>
