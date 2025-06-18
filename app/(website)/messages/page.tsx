@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Send, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
+import { Search, Send, MoreHorizontal, Edit2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +55,7 @@ interface UserProfile {
   };
 }
 
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}`
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 
 export default function MessagesPage() {
   const { data: session } = useSession();
@@ -69,8 +69,21 @@ export default function MessagesPage() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesScrollAreaRef = useRef<HTMLDivElement>(null);
 
   const token = session?.accessToken;
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesScrollAreaRef.current) {
+      const scrollContainer = messagesScrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  };
 
   // Fetch current user profile
   const fetchUserProfile = async () => {
@@ -143,8 +156,11 @@ export default function MessagesPage() {
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (selectedChat?.messages.length) {
+      // Use setTimeout to ensure the DOM has updated
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   }, [selectedChat?.messages]);
 
@@ -263,49 +279,12 @@ export default function MessagesPage() {
     }
   };
 
-  // Delete message
-  const deleteMessage = async (messageId: string) => {
-    if (!selectedChat || !token) return;
-
-    try {
-      const response = await fetch(`${BASE_URL}/chat/delete-message`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          chatId: selectedChat._id,
-          messageId,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        // Update local state
-        setSelectedChat((prev) => {
-          if (prev) {
-            return {
-              ...prev,
-              messages: prev.messages.filter((msg) => msg._id !== messageId),
-            };
-          }
-          return prev;
-        });
-        toast.success("Message deleted successfully");
-      }
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      toast.error("Failed to delete message");
-    }
-  };
-
   useEffect(() => {
     if (token) {
       fetchUserProfile();
       fetchChats();
     }
-  }, [token,fetchChats, fetchUserProfile]);
+  }, [token]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -431,7 +410,7 @@ export default function MessagesPage() {
 
             {/* Messages Container */}
             <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
+              <ScrollArea className="h-full" ref={messagesScrollAreaRef}>
                 <div className="p-4 space-y-4">
                   {selectedChat.messages.map((message) => {
                     const messageUser = getMessageUser(message);
@@ -528,15 +507,6 @@ export default function MessagesPage() {
                                       >
                                         <Edit2 className="h-4 w-4 mr-2" />
                                         Edit
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          deleteMessage(message._id)
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
