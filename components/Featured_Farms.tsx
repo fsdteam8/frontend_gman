@@ -455,23 +455,7 @@ const Featured_Farms = () => {
     },
   })
 
-  // Handle search input change
-  // const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const newSearchTerm = e.target.value
-  //   setSearchTerm(newSearchTerm)
-
-  //   // Update URL with new search term
-  //   const newSearchParams = new URLSearchParams(searchParams)
-  //   if (newSearchTerm) {
-  //     newSearchParams.set("search", newSearchTerm)
-  //   } else {
-  //     newSearchParams.delete("search")
-  //   }
-  //   setCurrentPage(1) // Reset to first page on new search
-  //   router.push(`${pathname}?${newSearchParams.toString()}`)
-  // }
-
-  // Helper function to get first letter of farm name
+ 
   const getFirstLetter = (name: string) => {
     return name.charAt(0).toUpperCase()
   }

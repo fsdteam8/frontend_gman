@@ -1,5 +1,5 @@
 "use client";
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -103,7 +103,7 @@ export default function Searchbar() {
                 Where
               </label>
               <div className="relative">
-                <MapPin className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 hidden md:block" />
+               
                 <Input
                   type="text"
                   placeholder="Search destinations"
@@ -120,7 +120,7 @@ export default function Searchbar() {
           <div className="flex-1 sm:pl-3 md:pl-4 lg:pl-6">
             <div className="space-y-1 sm:space-y-1.5">
               <label className="text-xs sm:text-sm font-semibold text-gray-900 hidden lg:block uppercase sm:normal-case tracking-wide sm:tracking-normal">
-                Category
+               Filter by Category
               </label>
               <Select
                 value={selectedCategory}

@@ -2,34 +2,56 @@
 
 import { useState, useEffect } from "react"
 import { X } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react"
 
 interface BannerAd {
-  id: number
-  title: string
-  backgroundColor: string
+  _id: string
+  thumbnail: {
+    public_id: string
+    url: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+async function fetchBanners(token: string): Promise<BannerAd[]> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/get-ads`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  const data = await response.json()
+  if (!data.success) {
+    throw new Error(data.message || "Failed to fetch banners")
+  }
+  return data.data
 }
 
 export default function Add_Banner() {
   const [isVisible, setIsVisible] = useState(true)
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
-  const [count, setCount] = useState(0)
-  console.log(count)
+  
 
-  const bannerAds: BannerAd[] = [
-    { id: 1, title: "Banner Ads", backgroundColor: "bg-green-100" },
-    { id: 2, title: "Special Offer", backgroundColor: "bg-blue-100" },
-    { id: 3, title: "New Products", backgroundColor: "bg-amber-100" },
-  ]
+ 
+  const session = useSession();
+   const token = session.data?.accessToken;
+
+  const { data: bannerAds = [], isLoading, error } = useQuery<BannerAd[], Error>({
+    queryKey: ["banners", token],
+    queryFn: () => fetchBanners(token || ""),
+    enabled: !!token,
+  })
 
   useEffect(() => {
     if (!api) {
       return
     }
 
-    setCount(api.scrollSnapList().length)
+   
     setCurrent(api.selectedScrollSnap() + 1)
 
     api.on("select", () => {
@@ -54,6 +76,9 @@ export default function Add_Banner() {
   }
 
   if (!isVisible) return null
+  if (isLoading) return <div>Loading banners...</div>
+  if (error) return <div>Error loading banners: {error.message}</div>
+  if (bannerAds.length === 0) return <div>No banners available</div>
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg">
@@ -67,9 +92,14 @@ export default function Add_Banner() {
       >
         <CarouselContent>
           {bannerAds.map((ad) => (
-            <CarouselItem key={ad.id} className="w-full">
+            <CarouselItem key={ad._id} className="w-full">
               <div
-                className={`relative w-full h-40 sm:h-48 md:h-56 lg:h-64 ${ad.backgroundColor} flex items-center justify-center`}
+                className="relative w-full h-40 sm:h-48 md:h-56 lg:h-64 flex items-center justify-center"
+                style={{
+                  backgroundImage: `url(${ad.thumbnail.url})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
               >
                 <Button
                   variant="ghost"
@@ -80,7 +110,6 @@ export default function Add_Banner() {
                   <X className="h-4 w-4" />
                   <span className="sr-only">Close</span>
                 </Button>
-                <h2 className="text-2xl md:text-3xl font-bold">{ad.title}</h2>
               </div>
             </CarouselItem>
           ))}
