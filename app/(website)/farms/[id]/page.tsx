@@ -242,7 +242,7 @@ export default function FarmPage() {
 
           {/* Description and Rating */}
           <div className="mt-4 sm:mt-6">
-            <p className="text-base sm:text-lg lg:text-xl text-[#4B5563] font-normal mb-3 sm:mb-4">
+            <p className="text-base sm:text-lg lg:text-base text-[#4B5563] font-normal mb-3 sm:mb-4">
               {farm.description}
             </p>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">

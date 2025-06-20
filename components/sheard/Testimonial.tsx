@@ -134,8 +134,8 @@ export default function TestimonialCarousel() {
               </h2>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <CarouselPrevious className="h-9 w-9 rounded-md border border-green-500 flex items-center justify-center text-green-500 hover:bg-green-50 static" />
-              <CarouselNext className="h-9 w-9 rounded-md border border-green-500 flex items-center justify-center text-green-500 hover:bg-green-50 static" />
+              <CarouselPrevious className="h-9 w-[76px] rounded-[4px] border border-[#039B06] flex items-center justify-center text-[#039B06]  static" />
+              <CarouselNext className="h-9 w-[76px] rounded-[4px] border border-[#039B06] flex items-center justify-center text-[#039B06]  static" />
             </div>
           </div>
           <CarouselContent className="-ml-4">

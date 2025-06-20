@@ -88,12 +88,12 @@ export default function ContactForm() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 min-h-[600px] lg:min-h-[629px]">
             {/* Contact Information Panel */}
             <div
-              className="relative w-full h-full min-h-[340px] lg:min-h-[629px] !rounded-[10px] bg-cover bg-center bg-no-repeat"
+              className="relative w-full h-full min-h-[340px] lg:min-h-[629px] !rounded-[10px] bg-cover bg-center bg-no-repeat z-50"
               style={{
                 backgroundImage: `url('/asset/contact.png')`,
               }}
             >
-              <div className="absolute inset-0 bg-black/10 !rounded-[10px]"></div>
+              <div className="absolute inset-0  !rounded-[10px]"></div>
               <div className="relative z-10 p-6 sm:p-8 lg:p-[32px] h-full flex flex-col justify-between">
                 <div>
                   <h2 className="text-xl lg:text-2xl text-[#272727] font-semibold mb-4">Contact Information</h2>

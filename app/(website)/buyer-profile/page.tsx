@@ -1,7 +1,8 @@
+
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,8 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
+
+  X,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +33,7 @@ interface ProfileData {
   avatar: {
     public_id: string;
     url: string;
-  };
+  } | File | undefined;
   address: {
     street: string;
     city: string;
@@ -44,6 +47,10 @@ interface ProfileData {
   createdAt: string;
   updatedAt: string;
 }
+
+// type ProfileUpdateInput = Partial<Omit<ProfileData, "avatar">> & {
+//   avatar?: File | { public_id: string; url: string };
+// };
 
 interface ApiResponse {
   success: boolean;
@@ -66,6 +73,9 @@ export default function BuyerProfile() {
   });
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const session = useSession();
   const token = session.data?.accessToken;
@@ -92,27 +102,28 @@ export default function BuyerProfile() {
   };
 
   const updateProfile = async (
-    profileData: Partial<ProfileData>
+    profileData: Partial<ProfileData> & { avatar?: File }
   ): Promise<ApiResponse> => {
-    const formattedData = {
-      name: profileData.name || "",
-      username: profileData.username || "",
-      phone: profileData.phone || "",
-      street: profileData.address?.street || "",
-      city: profileData.address?.city || "",
-      state: profileData.address?.state || "",
-      zipCode: profileData.address?.zipCode || "",
-    };
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", profileData.name || "");
+    formDataToSend.append("username", profileData.username || "");
+    formDataToSend.append("phone", profileData.phone || "");
+    formDataToSend.append("street", profileData.address?.street || "");
+    formDataToSend.append("city", profileData.address?.city || "");
+    formDataToSend.append("state", profileData.address?.state || "");
+    formDataToSend.append("zipCode", profileData.address?.zipCode || "");
+    if (profileData.avatar) {
+      formDataToSend.append("avatar", profileData.avatar);
+    }
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/user/update-profile`,
       {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formattedData),
+        body: formDataToSend,
       }
     );
 
@@ -163,7 +174,15 @@ export default function BuyerProfile() {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       setIsEditing(false);
       setFormData({});
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       toast.success("Profile updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update profile");
     },
   });
 
@@ -226,13 +245,41 @@ export default function BuyerProfile() {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSave = () => {
-    updateMutation.mutate(formData);
+    updateMutation.mutate({
+      ...formData,
+      avatar: selectedImage || undefined,
+    });
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setFormData({});
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -245,6 +292,11 @@ export default function BuyerProfile() {
     if (isEditing) {
       setIsEditing(false);
       setFormData({});
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -335,7 +387,8 @@ export default function BuyerProfile() {
                 <Avatar className="h-16 w-16 border">
                   <AvatarImage
                     src={
-                      profile.avatar?.url ||
+                      imagePreview ||
+                      (profile.avatar && !(profile.avatar instanceof File) ? profile.avatar.url : undefined) ||
                       "/placeholder.svg?height=64&width=64"
                     }
                     alt={`@${profile.username}`}
@@ -360,6 +413,32 @@ export default function BuyerProfile() {
                 </Button>
               )}
             </CardHeader>
+            {isEditing && (
+              <CardContent>
+                <div className="grid gap-4">
+                  <Label htmlFor="avatar">Profile Image</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      ref={fileInputRef}
+                      className="w-auto"
+                    />
+                    {imagePreview && (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={handleRemoveImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            )}
           </Card>
         </div>
 
@@ -442,9 +521,7 @@ export default function BuyerProfile() {
                       <Button
                         type="button"
                         variant="ghost"
-                       
-                      
-                       
+                        size="icon"
                         className="absolute right-2 top-1/2 -translate-y-1/2"
                         onClick={() => setShowNewPassword(!showNewPassword)}
                       >
