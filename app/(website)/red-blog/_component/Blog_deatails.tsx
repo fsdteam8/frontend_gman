@@ -272,7 +272,7 @@ export default function BlogDetails() {
          
 
           {/* Back to blog link */}
-          <div className="mt-8 pt-6 border-t">
+          <div className="mt-8 pt-6 border-t pb-10">
             <Link href="/blog" className="inline-flex items-center text-[#039B06] hover:underline font-medium">
               ← Back to Blog
             </Link>

@@ -110,7 +110,7 @@ export default function Searchbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="pl-7 sm:pl-10 md:pl-12 border-0 text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-12 w-full"
+                  className="border-0 text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-12 w-full"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function Searchbar() {
             <Button
               size="icon"
               onClick={handleSearch}
-              className="bg-green-500 hover:bg-green-600 rounded-full w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center justify-center"
+              className="bg-[#039B06] hover:bg-[#039B06]/80 rounded-full w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center justify-center"
             >
               <Search className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-white" />
             </Button>
