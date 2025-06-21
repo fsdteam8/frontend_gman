@@ -1,6 +1,4 @@
-"use client";
-
-
+"use client"
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -14,16 +12,6 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-// Fix for default Leaflet icon issues with Webpack
-if (typeof window !== "undefined") {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  });
-}
 
 interface MapModalProps {
   isOpen: boolean;
@@ -39,6 +27,19 @@ export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat
   );
   const [placeName, setPlaceName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Fix for default Leaflet icon issues with Webpack (runs only on client side)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+      });
+    }
+  }, []); // Empty dependency array to run once on mount
 
   // Fetch place name using Nominatim API
   const fetchPlaceName = async (lat: number, lng: number) => {
@@ -116,7 +117,7 @@ export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat
       <DialogContent className="sm:max-w-[1000px] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>Select Farm Location</DialogTitle>
-          <DialogDescription>Click on the map to select your farm's location.</DialogDescription>
+          <DialogDescription>Click on the map to select your farm&lsquo;s location.</DialogDescription>
         </DialogHeader>
         <div className="p-6 pt-0">
           <div className="h-[400px] w-full rounded-md overflow-hidden">
@@ -135,7 +136,6 @@ export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat
               </MapContainer>
             )}
           </div>
-        
         </div>
         <DialogFooter className="p-6 pt-0">
           <Button

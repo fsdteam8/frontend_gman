@@ -34,7 +34,7 @@ export default function MissionTableFresh() {
               </p>
               <p className="text-[#595959] text-sm sm:text-base font-normal leading-[150%]">
                 Today food is flown around the world in a matter of hours. Every grocery store has amazing selection
-                with seasonality no longer applying. &lsquo;But, at what cost&lsquo;.
+                with seasonality no longer applying. &lsquo;But, at what cost?&lsquo;.
               </p>
             </div>
           </div>
