@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Send, MoreHorizontal, Edit2, Trash2 } from "lucide-react";
+import { Search, Send, MoreHorizontal, Edit2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -267,54 +267,17 @@ export default function FarmMessagesPage() {
     }
   };
 
-  // Delete message
-  const deleteMessage = async (messageId: string) => {
-    if (!selectedChat || !token) return;
-
-    try {
-      const response = await fetch(`${BASE_URL}/chat/delete-message`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          chatId: selectedChat._id,
-          messageId,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        // Update local state
-        setSelectedChat((prev) => {
-          if (prev) {
-            return {
-              ...prev,
-              messages: prev.messages.filter((msg) => msg._id !== messageId),
-            };
-          }
-          return prev;
-        });
-        toast.success("Message deleted successfully");
-      }
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      toast.error("Failed to delete message");
-    }
-  };
-
   useEffect(() => {
     if (token) {
       fetchUserProfile();
     }
-  }, [token,fetchUserProfile]);
+  }, [token]);
 
   useEffect(() => {
     if (currentUser?.farm) {
       fetchChats();
     }
-  }, [currentUser?.farm, token,fetchChats]);
+  }, [currentUser?.farm, token]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -550,15 +513,6 @@ export default function FarmMessagesPage() {
                                       >
                                         <Edit2 className="h-4 w-4 mr-2" />
                                         Edit
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          deleteMessage(message._id)
-                                        }
-                                        className="text-red-600"
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>

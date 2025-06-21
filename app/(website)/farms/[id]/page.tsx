@@ -478,8 +478,8 @@ export default function FarmPage() {
 
       if (data.success) {
         // Redirect to the chat page with the chat ID
-        router.push(`/messages/${data.data._id}`)
-        toast.success("Chat created successfully")
+        router.push(`/messages/${data.data._id}`);
+        toast.success("Chat is opening...");
       } else {
         throw new Error(data.message || "Failed to create chat")
       }
