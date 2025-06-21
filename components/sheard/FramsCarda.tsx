@@ -1,34 +1,106 @@
-import type React from "react"
-import { MapPin, MessageCircle, Star } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+"use client";
+import type React from "react";
+import { MapPin, MessageCircle, Star } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface FarmsCardProps {
-  id: string
-  name: string
-  location: string | { street?: string; city?: string; state?: string; zipCode?: string }
-  image: string
-  profileImage: string
-  description: string
-  rating: number
-  street?: string
-  state?: string
+  id: string;
+  name: string;
+  location:
+    | string
+    | { street?: string; city?: string; state?: string; zipCode?: string };
+  image: string;
+  profileImage: string;
+  description: string;
+  rating: number;
+  street?: string;
+  state?: string;
 }
 
-const FarmsCard: React.FC<FarmsCardProps> = ({ id, name, location, image, profileImage, description, rating ,street, state}) => {
+const FarmsCard: React.FC<FarmsCardProps> = ({
+  id,
+  name,
+  location,
+  image,
+  profileImage,
+  description,
+  rating,
+  street,
+  state,
+}) => {
+  const { data: session } = useSession();
+
+  const [loading, setLoading] = useState(false);
+  const token = session?.accessToken;
+  const router = useRouter();
+
+  const handleStartChat = async () => {
+    if (!token) {
+      toast.error("Please login to start a chat");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/chat/create-chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            farmId: id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Redirect to the chat page with the chat ID
+        router.push(`/messages/${data.data._id}`);
+        toast.success("Chat is opening...");
+      } else {
+        throw new Error(data.message || "Failed to create chat");
+      }
+    } catch (error) {
+      console.error("Error creating chat:", error);
+      toast("Failed to start chat. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Format location based on whether it's a string or an object
   const formattedLocation =
     typeof location === "string"
       ? location
-      : `${location.city || ""}, ${location.state || ""}`.trim().replace(/^,\s*/, "")
+      : `${location.city || ""}, ${location.state || ""}`
+          .trim()
+          .replace(/^,\s*/, "");
 
   return (
     <div className="w-full">
       {/* Main Farm Image */}
       <div className="w-full relative">
-        <div className="bg-white w-[50px] h-[50px] rounded-full absolute top-4 right-4 flex items-center justify-center shadow-lg cursor-pointer hover:bg-gray-50 transition-colors">
-          <MessageCircle className="w-5 h-5 text-gray-600" />
-        </div>
+        <Button
+          onClick={handleStartChat}
+          disabled={loading}
+          className="bg-white w-[50px] h-[50px] rounded-full absolute top-4 right-4 flex items-center justify-center shadow-lg cursor-pointer hover:bg-gray-50 transition-colors"
+        >
+          <div>
+            <MessageCircle className="w-5 h-5 text-gray-600" />
+          </div>
+        </Button>
         <Image
           src={image || "/placeholder.svg?height=260&width=320"}
           width={320}
@@ -89,7 +161,7 @@ const FarmsCard: React.FC<FarmsCardProps> = ({ id, name, location, image, profil
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FarmsCard
+export default FarmsCard;
