@@ -1,14 +1,19 @@
-import PageHeader from '@/components/sheard/PageHeader'
-import React from 'react'
-import Aboutus from './_component/Aboutus'
+import PageHeader from "@/components/sheard/PageHeader";
+import React from "react";
+import Aboutus from "./_component/Aboutus";
 
 function Page() {
   return (
-    <div className=''>
-        <PageHeader imge='/asset/aboutheader.jpg' titile="About Us" subtitle='Lorem ipsum is a dummy or placeholder text commonly used in graphic design, publishing, and web development.'/>
-     <Aboutus/>
+    <div>
+      <PageHeader
+        image="/asset/aboutUs.png"
+        title="About Us"
+        gradientColor="0, 115, 2"
+        gradientOpacity={0.5}
+      />
+      <Aboutus />
     </div>
-  )
+  );
 }
 
-export default Page
+export default Page;

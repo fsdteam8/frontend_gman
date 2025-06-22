@@ -1,34 +1,37 @@
 interface PageHeaderProps {
-  titile?: string;
+  title?: string;
   subtitle?: string;
-  imge?: string;
+  image?: string;
+  gradientColor?: string; // Optional: RGB values for gradient (e.g., "0, 115, 2")
+  gradientOpacity?: number; // Optional: Gradient opacity (0 to 1)
 }
-export default function PageHeader({ titile, subtitle, imge}: PageHeaderProps) {
+
+export default function PageHeader({
+  title,
+  image,
+  gradientColor = "0, 115, 2",
+  gradientOpacity = 0.4,
+}: PageHeaderProps) {
+  const backgroundImage = image
+    ? `linear-gradient(rgba(${gradientColor}, ${gradientOpacity}), rgba(${gradientColor}, ${gradientOpacity})), url('${image}')`
+    : `linear-gradient(rgba(${gradientColor}, ${gradientOpacity}), rgba(${gradientColor}, ${gradientOpacity}))`;
+
   return (
-    <section className="relative w-full h-[400px] md:h-[500px] lg:h-[590px] flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
+    <section className="relative h-[300px] md:h-[659px] overflow-hidden">
+      {/* Background Image with Linear Gradient Overlay */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('" + (imge ) + "')",
+          backgroundImage,
         }}
       />
 
-      {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-[#00730266]" />
-
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 ">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-            {titile }
+      {/* Content - Updated to properly center */}
+      <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 sm:px-6 lg:px-8 container mx-auto">
+        <h1 className="text-lg md:text-4xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+          {title || "Page Title"}
         </h1>
-        <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90  mx-auto font-normal max-[1000px] leading-relaxed">
-            {subtitle}
-        </p>
       </div>
-
-      {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white/10 to-transparent" />
     </section>
-  )
+  );
 }

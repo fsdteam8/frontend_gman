@@ -88,7 +88,7 @@ export default function ContactForm() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 min-h-[600px] lg:min-h-[629px]">
             {/* Contact Information Panel */}
             <div
-              className="relative w-full h-full min-h-[340px] lg:min-h-[629px] !rounded-[10px] bg-cover bg-center bg-no-repeat z-50"
+              className="relative w-full h-full min-h-[340px] lg:min-h-[629px] !rounded-[10px] bg-cover bg-center bg-no-repeat"
               style={{
                 backgroundImage: `url('/asset/contact.png')`,
               }}

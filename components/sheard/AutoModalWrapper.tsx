@@ -149,16 +149,16 @@ const AutoModalWrapper = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const { status } = useSession();
 
-  useEffect(() => {
-    const hasModalBeenShown = sessionStorage.getItem("modalShown");
-    if (!hasModalBeenShown) {
-      const timer = setTimeout(() => {
-        setIsModalOpen(true);
-        sessionStorage.setItem("modalShown", "true");
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const hasModalBeenShown = sessionStorage.getItem("modalShown");
+  //   if (!hasModalBeenShown) {
+  //     const timer = setTimeout(() => {
+  //       setIsModalOpen(true);
+  //       sessionStorage.setItem("modalShown", "true");
+  //     }, 5000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, []);
 
   useEffect(() => {
     const hasReviewModalBeenShown = sessionStorage.getItem("reviewModalShown");
