@@ -6,9 +6,8 @@ const page = () => {
   return (
     <div>
       <PageHeader
-        titile="Our Mission"
-        subtitle="We are committed to providing the best service possible, ensuring customer satisfaction and continuous improvement."
-        imge="/asset/missionheader.jpg"
+        title="Our Mission"
+        image="/asset/missionheader.jpg"
       />
       <MissionTableFresh/>
     </div>

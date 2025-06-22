@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import PageHeader from "@/components/sheard/PageHeader";
 
 interface User {
   _id: string;
@@ -325,241 +326,256 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Chat List Sidebar */}
-      <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200 flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search Message..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+    <>
+      <PageHeader
+        image="/asset/messgeHeader.png"
+        title="Stay Connected With Your Favorite Farms"
+        gradientColor="0, 115, 2"
+        gradientOpacity={0.5}
+      />
 
-        <ScrollArea className="flex-1">
-          <div className="divide-y divide-gray-100">
-            {filteredChats.map((chat) => (
-              <div
-                key={chat._id}
-                onClick={() => {
-                  setSelectedChat(chat);
-                  fetchChatDetails(chat._id);
-                }}
-                className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                  selectedChat?._id === chat._id ? "bg-blue-50" : ""
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src="/placeholder.svg?height=48&width=48" />
-                    <AvatarFallback className="bg-green-500 text-white">
-                      {chat.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">
-                        {chat.name}
-                      </h3>
-                      {chat.messages.length > 0 && (
-                        <span className="text-xs text-gray-500">
-                          {formatTime(
-                            chat.messages[chat.messages.length - 1].date
-                          )}
-                        </span>
-                      )}
-                    </div>
-                    {chat.messages.length > 0 && (
-                      <p className="text-sm text-gray-500 truncate">
-                        {chat.messages[chat.messages.length - 1].text}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
-
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {selectedChat ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 bg-white border-b border-gray-200 flex-shrink-0">
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                  <AvatarFallback className="bg-green-500 text-white">
-                    {selectedChat.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {selectedChat.name}
-                  </h2>
-                  <p className="text-sm text-gray-500">Farm</p>
-                </div>
+      <div className="container mx-auto px-4 py-24">
+        <div className="grid grid-cols-8 gap-4">
+          {/* Chat List Sidebar */}
+          <div className="col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-gray-200 flex-shrink-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search Message..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </div>
 
-            {/* Messages Container */}
-            <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full" ref={messagesScrollAreaRef}>
-                <div className="p-4 space-y-4">
-                  {selectedChat.messages.map((message) => {
-                    const messageUser = getMessageUser(message);
-                    const isOwn = isCurrentUser(message);
-
-                    return (
-                      <div
-                        key={message._id}
-                        className={`flex ${
-                          isOwn ? "justify-end" : "justify-start"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            isOwn
-                              ? "bg-green-500 text-white"
-                              : "bg-gray-200 text-gray-900"
-                          }`}
-                        >
-                          {!isOwn && messageUser && (
-                            <div className="flex items-center space-x-2 mb-1">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage
-                                  src={
-                                    getAvatarUrl(messageUser) ||
-                                    "/placeholder.svg"
-                                  }
-                                />
-                                <AvatarFallback className="bg-blue-500 text-white text-xs">
-                                  {messageUser.name.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <p className="text-xs font-medium">
-                                {messageUser.name}
-                              </p>
-                            </div>
-                          )}
-
-                          {editingMessage === message._id ? (
-                            <div className="space-y-2">
-                              <Input
-                                value={editText}
-                                onChange={(e) => setEditText(e.target.value)}
-                                className="text-sm"
-                              />
-                              <div className="flex space-x-2">
-                                <Button
-                                  size="sm"
-                                  onClick={() => updateMessage(message._id)}
-                                >
-                                  Save
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setEditingMessage(null);
-                                    setEditText("");
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <p className="text-sm">{message.text}</p>
-                              <div className="flex items-center justify-between mt-1">
-                                <span
-                                  className={`text-xs ${
-                                    isOwn ? "text-green-100" : "text-gray-500"
-                                  }`}
-                                >
-                                  {formatTime(message.date)}
-                                </span>
-
-                                {isOwn && (
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0 text-green-100 hover:text-white"
-                                      >
-                                        <MoreHorizontal className="h-3 w-3" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setEditingMessage(message._id);
-                                          setEditText(message.text);
-                                        }}
-                                      >
-                                        <Edit2 className="h-4 w-4 mr-2" />
-                                        Edit
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                )}
-                              </div>
-                            </>
+            <ScrollArea className="flex-1">
+              <div className="divide-y divide-gray-100">
+                {filteredChats.map((chat) => (
+                  <div
+                    key={chat._id}
+                    onClick={() => {
+                      setSelectedChat(chat);
+                      fetchChatDetails(chat._id);
+                    }}
+                    className={`p-4 cursor-pointer hover:bg-gray-50 ${
+                      selectedChat?._id === chat._id ? "bg-blue-50" : ""
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src="/placeholder.svg?height=48&width=48" />
+                        <AvatarFallback className="bg-green-500 text-white">
+                          {chat.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-medium text-gray-900 truncate">
+                            {chat.name}
+                          </h3>
+                          {chat.messages.length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              {formatTime(
+                                chat.messages[chat.messages.length - 1].date
+                              )}
+                            </span>
                           )}
                         </div>
+                        {chat.messages.length > 0 && (
+                          <p className="text-sm text-gray-500 truncate">
+                            {chat.messages[chat.messages.length - 1].text}
+                          </p>
+                        )}
                       </div>
-                    );
-                  })}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-            </div>
-
-            {/* Message Input */}
-            <div className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Type your message"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      sendMessage();
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={sendMessage}
-                  disabled={!newMessage.trim()}
-                  className="bg-green-500 hover:bg-green-600"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Select a conversation
-              </h3>
-              <p className="text-gray-500">
-                Choose a chat from the sidebar to start messaging
-              </p>
-            </div>
+            </ScrollArea>
           </div>
-        )}
+
+          {/* Chat Area */}
+          <div className="col-span-6 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden max-h-[800px]">
+            {selectedChat ? (
+              <>
+                {/* Chat Header */}
+                <div className="p-4 bg-white border-b border-gray-200 flex-shrink-0">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                      <AvatarFallback className="bg-green-500 text-white">
+                        {selectedChat.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {selectedChat.name}
+                      </h2>
+                      <p className="text-sm text-gray-500">Farm</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Messages Container */}
+                <div className="flex-1 overflow-hidden">
+                  <ScrollArea className="h-full" ref={messagesScrollAreaRef}>
+                    <div className="p-4 space-y-4">
+                      {selectedChat.messages.map((message) => {
+                        const messageUser = getMessageUser(message);
+                        const isOwn = isCurrentUser(message);
+
+                        return (
+                          <div
+                            key={message._id}
+                            className={`flex ${
+                              isOwn ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            <div
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                isOwn
+                                  ? "bg-green-500 text-white"
+                                  : "bg-gray-200 text-gray-900"
+                              }`}
+                            >
+                              {!isOwn && messageUser && (
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage
+                                      src={
+                                        getAvatarUrl(messageUser) ||
+                                        "/placeholder.svg"
+                                      }
+                                    />
+                                    <AvatarFallback className="bg-blue-500 text-white text-xs">
+                                      {messageUser.name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <p className="text-xs font-medium">
+                                    {messageUser.name}
+                                  </p>
+                                </div>
+                              )}
+
+                              {editingMessage === message._id ? (
+                                <div className="space-y-2">
+                                  <Input
+                                    value={editText}
+                                    onChange={(e) =>
+                                      setEditText(e.target.value)
+                                    }
+                                    className="text-sm"
+                                  />
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => updateMessage(message._id)}
+                                    >
+                                      Save
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingMessage(null);
+                                        setEditText("");
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="text-sm">{message.text}</p>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span
+                                      className={`text-xs ${
+                                        isOwn
+                                          ? "text-green-100"
+                                          : "text-gray-500"
+                                      }`}
+                                    >
+                                      {formatTime(message.date)}
+                                    </span>
+
+                                    {isOwn && (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 w-6 p-0 text-green-100 hover:text-white"
+                                          >
+                                            <MoreHorizontal className="h-3 w-3" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem
+                                            onClick={() => {
+                                              setEditingMessage(message._id);
+                                              setEditText(message.text);
+                                            }}
+                                          >
+                                            <Edit2 className="h-4 w-4 mr-2" />
+                                            Edit
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+                </div>
+
+                {/* Message Input */}
+                <div className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
+                  <div className="flex space-x-2">
+                    <Input
+                      placeholder="Type your message"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          sendMessage();
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim()}
+                      className="bg-green-500 hover:bg-green-600"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Select a conversation
+                  </h3>
+                  <p className="text-gray-500">
+                    Choose a chat from the sidebar to start messaging
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

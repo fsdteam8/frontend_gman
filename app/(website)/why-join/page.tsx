@@ -1,14 +1,19 @@
-import PageHeader from '@/components/sheard/PageHeader'
-import React from 'react'
-import Reasons from './_component/Reasons'
+import PageHeader from "@/components/sheard/PageHeader";
+import React from "react";
+import Reasons from "./_component/Reasons";
 
 const page = () => {
   return (
     <div>
-      <PageHeader imge='/asset/banner1.png' titile="Join the Food Revolution with Tablefresh" subtitle='Discover the benefits of joining our community of local farmers and health-conscious consumers. '/>
-      <Reasons/>
+      <PageHeader
+        image="/asset/whyJoin.png"
+        title="Join the Food Revolution with Tablefresh"
+        gradientColor="0, 115, 2"
+        gradientOpacity={0.4}
+      />
+      <Reasons />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

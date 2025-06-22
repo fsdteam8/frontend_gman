@@ -1,14 +1,19 @@
-import PageHeader from '@/components/sheard/PageHeader'
-import React from 'react'
-import PrivacyPolicy from './_component/Privacy_Policy'
+import PageHeader from "@/components/sheard/PageHeader";
+import React from "react";
+import PrivacyPolicy from "./_component/Privacy_Policy";
 
 const page = () => {
   return (
     <div>
-        <PageHeader imge='/asset/privacy.png' titile="Privacy Policy " subtitle='Lorem ipsum is a dummy or placeholder text commonly used in graphic design, publishing, and web development.'/>
-        <PrivacyPolicy/>
+      <PageHeader
+        image="/asset/privacy.png"
+        title="Privacy Policy "
+        gradientColor="0, 115, 2"
+        gradientOpacity={0.4}
+      />
+      <PrivacyPolicy />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

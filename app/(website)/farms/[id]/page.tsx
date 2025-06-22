@@ -204,7 +204,7 @@
 //         <div className="mb-8 sm:mb-10 lg:mb-12">
 //           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 //             {/* Profile Image and Basic Info */}
-            
+
 //             <div className="flex items-start gap-4 flex-1">
 //               <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[80px] lg:h-[80px] rounded-full overflow-hidden flex-shrink-0">
 //                 <Image
@@ -238,9 +238,9 @@
 //                   </span>
 //                 </div>
 //               </div>
-//             </div> 
+//             </div>
 //             <div className="w-[800px] border border-red-400 h-full ">
-//               map here 
+//               map here
 //             </div>
 //           </div>
 
@@ -369,93 +369,98 @@
 //   );
 // }
 
+"use client";
 
-"use client"
-
-import Image from "next/image"
-import { Heart, MapPin, Star, MessageCircle, Clock6 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import PageHeader from "@/components/sheard/PageHeader"
-import { useState } from "react"
-import Link from "next/link"
-import { useQuery } from "@tanstack/react-query"
-import { useParams } from "next/navigation"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { toast } from "sonner"
+import Image from "next/image";
+import { Heart, MapPin, Star, MessageCircle, Clock6 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import PageHeader from "@/components/sheard/PageHeader";
+import { useState } from "react";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface Product {
-  _id: string
-  title: string
-  thumbnail?: { url: string }
-  price: number
-  quantity: string
-  review: { rating: number; user: string; text: string; _id: string }[]
-  status: string
+  _id: string;
+  title: string;
+  thumbnail?: { url: string };
+  price: number;
+  quantity: string;
+  review: { rating: number; user: string; text: string; _id: string }[];
+  status: string;
 }
 
 interface Farm {
-  _id: string
-  name: string
-  isOrganic: boolean
-  description: string
-  images?: { url: string; public_id: string; _id: string }[]
+  _id: string;
+  name: string;
+  isOrganic: boolean;
+  description: string;
+  images?: { url: string; public_id: string; _id: string }[];
   location: {
-    city: string
-    state: string
-    street: string
-  }
-  rating: number
-  latitude?: number
-  longitude?: number
+    city: string;
+    state: string;
+    street: string;
+  };
+  rating: number;
+  latitude?: number;
+  longitude?: number;
 }
 
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}`
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 
 interface ApiResponse {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
   data: {
-    farm: Farm
-    product: Product[]
-  }
+    farm: Farm;
+    product: Product[];
+  };
 }
 
 export default function FarmPage() {
-  const [favorites, setFavorites] = useState<string[]>([])
-  const params = useParams()
-  const farmId = params.id as string
-  const { data: session } = useSession()
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const params = useParams();
+  const farmId = params.id as string;
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const token = session?.accessToken
+  const token = session?.accessToken;
 
-  console.log(token, "token")
+  console.log(token, "token");
 
   const toggleFavorite = (productId: string) => {
-    setFavorites((prev) => (prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]))
-  }
+    setFavorites((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
 
   const { data, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ["farm", farmId],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/farm/${farmId}`)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/farm/${farmId}`
+      );
       if (!response.ok) {
-        throw new Error("Failed to fetch farm data")
+        throw new Error("Failed to fetch farm data");
       }
-      return response.json()
+      return response.json();
     },
-  })
+  });
 
   const handleStartChat = async () => {
     if (!token) {
-      toast.error("Please login to start a chat")
-      return
+      toast.error("Please login to start a chat");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const response = await fetch(`${BASE_URL}/chat/create-chat`, {
@@ -467,23 +472,23 @@ export default function FarmPage() {
         body: JSON.stringify({
           farmId,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        router.push(`/messages/${data.data._id}`)
-        toast.success("Chat is opening...")
+        router.push(`/messages/${data.data._id}`);
+        toast.success("Chat is opening...");
       } else {
-        throw new Error(data.message || "Failed to create chat")
+        throw new Error(data.message || "Failed to create chat");
       }
     } catch (error) {
-      console.error("Error creating chat:", error)
-      toast("Failed to start chat. Please try again.")
+      console.error("Error creating chat:", error);
+      toast("Failed to start chat. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -518,15 +523,19 @@ export default function FarmPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !data?.success) {
-    return <div className="min-h-screen flex items-center justify-center text-base sm:text-lg text-gray-600">Error loading farm data</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center text-base sm:text-lg text-gray-600">
+        Error loading farm data
+      </div>
+    );
   }
 
-  const farm = data.data.farm
-  const products = data.data.product
+  const farm = data.data.farm;
+  const products = data.data.product;
 
   // Calculate average rating for the farm based on product reviews
   const averageRating =
@@ -534,21 +543,30 @@ export default function FarmPage() {
       ? products.reduce((acc, product) => {
           const productAvg =
             product.review.length > 0
-              ? product.review.reduce((sum, review) => sum + review.rating, 0) / product.review.length
-              : 0
-          return acc + productAvg
+              ? product.review.reduce((sum, review) => sum + review.rating, 0) /
+                product.review.length
+              : 0;
+          return acc + productAvg;
         }, 0) / products.length
-      : 0
+      : 0;
 
-  const totalReviews = products.reduce((acc, product) => acc + product.review.length, 0)
+  const totalReviews = products.reduce(
+    (acc, product) => acc + product.review.length,
+    0
+  );
 
   return (
     <div className="min-h-screen">
       {/* Page Header */}
       <PageHeader
-        imge={farm.images && farm.images.length > 0 ? farm.images[0].url : "/asset/framheader.jpg"}
-        titile={farm.name}
-        subtitle={farm.description}
+        image={
+          farm.images && farm.images.length > 0
+            ? farm.images[0].url
+            : "/asset/framheader.jpg"
+        }
+        title={farm.name}
+        gradientColor="0, 115, 2"
+        gradientOpacity={0.4}
       />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-12">
@@ -558,7 +576,11 @@ export default function FarmPage() {
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 xs:w-16 xs:h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0">
                 <Image
-                  src={farm.images && farm.images.length > 0 ? farm.images[0].url : "/asset/profile1.png"}
+                  src={
+                    farm.images && farm.images.length > 0
+                      ? farm.images[0].url
+                      : "/asset/profile1.png"
+                  }
                   alt={`${farm.name} profile`}
                   width={80}
                   height={80}
@@ -566,7 +588,9 @@ export default function FarmPage() {
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-base xs:text-lg sm:text-xl font-semibold text-[#272727] mb-2">{farm.name}</h1>
+                <h1 className="text-base xs:text-lg sm:text-xl font-semibold text-[#272727] mb-2">
+                  {farm.name}
+                </h1>
                 {farm.isOrganic && (
                   <div className="flex items-center gap-2 mb-2">
                     <Clock6 className="w-3 h-3 xs:w-4 xs:h-4 text-[#039B06] flex-shrink-0" />
@@ -578,7 +602,8 @@ export default function FarmPage() {
                 <div className="flex items-center gap-1 text-gray-600">
                   <MapPin className="w-3 h-3 xs:w-4 xs:h-4 text-[#039B06] flex-shrink-0" />
                   <span className="text-xs xs:text-sm sm:text-base font-normal text-[#595959]">
-                    {farm.location.street}, {farm.location.city}, {farm.location.state}
+                    {farm.location.street}, {farm.location.city},{" "}
+                    {farm.location.state}
                   </span>
                 </div>
               </div>
@@ -591,8 +616,12 @@ export default function FarmPage() {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Star className="w-3 h-3 xs:w-4 xs:h-4 fill-[#FACC15] text-[#FACC15]" />
-                    <span className="font-semibold text-[#000000] text-xs xs:text-sm">{averageRating.toFixed(1)}</span>
-                    <span className="text-xs xs:text-sm text-[#272727]">({totalReviews})</span>
+                    <span className="font-semibold text-[#000000] text-xs xs:text-sm">
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-xs xs:text-sm text-[#272727]">
+                      ({totalReviews})
+                    </span>
                   </div>
                 </div>
                 <Button
@@ -638,7 +667,10 @@ export default function FarmPage() {
           ) : (
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
               {products.map((product) => (
-                <Link key={product._id} href={`/product-details/${product._id}`}>
+                <Link
+                  key={product._id}
+                  href={`/product-details/${product._id}`}
+                >
                   <div className="group cursor-pointer relative overflow-hidden">
                     <div className="relative">
                       <div className="aspect-square overflow-hidden rounded-lg">
@@ -652,8 +684,8 @@ export default function FarmPage() {
                       </div>
                       <button
                         onClick={(e) => {
-                          e.preventDefault()
-                          toggleFavorite(product._id)
+                          e.preventDefault();
+                          toggleFavorite(product._id);
                         }}
                         className={`absolute top-2 right-2 p-1.5 xs:p-2 rounded-full transition-colors ${
                           favorites.includes(product._id)
@@ -679,8 +711,12 @@ export default function FarmPage() {
                       <h3 className="font-semibold text-xs xs:text-sm sm:text-base text-[#111827] mb-2 line-clamp-2">
                         {product.title}
                       </h3>
-                      <p className="text-xs sm:text-sm font-normal text-[#4B5563] mb-1">2.5 kilometers away</p>
-                      <p className="text-xs sm:text-sm font-normal text-[#4B5563] mb-2 sm:mb-3">Available all year</p>
+                      <p className="text-xs sm:text-sm font-normal text-[#4B5563] mb-1">
+                        2.5 kilometers away
+                      </p>
+                      <p className="text-xs sm:text-sm font-normal text-[#4B5563] mb-2 sm:mb-3">
+                        Available all year
+                      </p>
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-xs sm:text-sm text-[#111827]">
                           ${product.price} per {product.quantity}
@@ -688,9 +724,16 @@ export default function FarmPage() {
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 xs:w-4 xs:h-4 fill-[#FACC15] text-[#FACC15]" />
                           <span className="text-xs sm:text-sm font-medium text-gray-900">
-                            {(product.review.reduce((acc, r) => acc + r.rating, 0) / product.review.length || 0).toFixed(1)}
+                            {(
+                              product.review.reduce(
+                                (acc, r) => acc + r.rating,
+                                0
+                              ) / product.review.length || 0
+                            ).toFixed(1)}
                           </span>
-                          <span className="text-xs sm:text-sm text-gray-600">({product.review.length})</span>
+                          <span className="text-xs sm:text-sm text-gray-600">
+                            ({product.review.length})
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -702,5 +745,5 @@ export default function FarmPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

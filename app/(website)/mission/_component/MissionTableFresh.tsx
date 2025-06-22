@@ -6,7 +6,6 @@ export default function MissionTableFresh() {
     <div className="mt-16 md:mt-[100px]">
       {/* Header */}
       <header className="text-center py-6 md:py-8 px-4">
-        <div className="text-[#039B06] text-sm sm:text-base font-semibold">Mission Table Fresh</div>
         <h1 className="text-xl sm:text-2xl lg:text-[32px] font-semibold text-[#272727] mb-3 md:mb-4 leading-tight max-w-4xl mx-auto">
           Connecting People Through Food, Building Community Through Tradition
         </h1>
@@ -34,7 +33,7 @@ export default function MissionTableFresh() {
               </p>
               <p className="text-[#595959] text-sm sm:text-base font-normal leading-[150%]">
                 Today food is flown around the world in a matter of hours. Every grocery store has amazing selection
-                with seasonality no longer applying. &lsquo;But, at what cost?&lsquo;.
+                with seasonality no longer applying. But, at what cost?
               </p>
             </div>
           </div>
