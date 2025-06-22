@@ -14,12 +14,17 @@ export default function ActiveProductsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Active Product List"
-        breadcrumb="Dashboard › Active Product › List"
+        breadcrumb={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Active Product", href: "/dashboard/active-product" },
+          { label: "List" },
+        ]}
         action={{
           label: "Add Product",
           onClick: () => setShowCreateForm(true),
         }}
       />
+
       {showCreateForm ? (
         <CreateProductForm
           onClose={() => setShowCreateForm(false)}
@@ -29,7 +34,7 @@ export default function ActiveProductsPage() {
           }}
         />
       ) : (
-        <ActiveProductsList  />
+        <ActiveProductsList />
       )}
     </div>
   );

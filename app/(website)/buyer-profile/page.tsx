@@ -21,8 +21,9 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface ProfileData {
   _id: string;
@@ -79,6 +80,7 @@ export default function BuyerProfile() {
   const queryClient = useQueryClient();
   const session = useSession();
   const token = session.data?.accessToken;
+  const router = useRouter()
 
   const fetchProfile = async (): Promise<ApiResponse> => {
     const response = await fetch(
@@ -282,6 +284,17 @@ export default function BuyerProfile() {
     }
   };
 
+  
+    const handleLogout = async () => {
+      try {
+        await signOut({ redirect: false })
+        toast.success("Logged out successfully!")
+        router.push("/")
+      } catch (error) {
+        toast.error("Failed to log out: " + (error as Error).message)
+      }
+    }
+
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     passwordMutation.mutate(passwordData);
@@ -461,7 +474,7 @@ export default function BuyerProfile() {
                     <Button variant="outline" onClick={togglePasswordChange}>
                       Change Password
                     </Button>
-                    <Button variant="outline">Log Out</Button>
+                    <Button variant="outline" onClick={handleLogout}>Log Out</Button>
                     <Button
                       variant="outline"
                       className="gap-1 md:hidden"
