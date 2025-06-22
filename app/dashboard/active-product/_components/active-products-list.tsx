@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import PacificPagination from "@/components/ui/PacificPagination";
 
 interface Product {
   _id: string;
@@ -37,28 +38,38 @@ interface Product {
 
 export function ActiveProductsList() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
+  const queryClient = useQueryClient();
   const session = useSession();
   const token = session.data?.accessToken;
 
-  // Fetch products
-  const { data: products, isLoading } = useQuery<Product[]>({
-    queryKey: ["activeProducts"],
+  // Fetch products with pagination
+  const { data, isLoading } = useQuery({
+    queryKey: ["activeProducts", page],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/seller/active-products`,
+        `${process.env.NEXT_PUBLIC_API_URL}/seller/active-products?page=${page}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+      if (!response.ok) throw new Error("Failed to fetch products");
       const result = await response.json();
-      return result.data;
+      return result;
     },
     enabled: !!session?.data?.accessToken,
   });
+
+  // Assuming API returns something like:
+  // { data: Product[], total: number, totalPage: number }
+
+  const products: Product[] = data?.data || [];
+  const totalPages = data?.totalPage || 1;
+  const totalItems = data?.total || 0;
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -107,16 +118,16 @@ export function ActiveProductsList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products?.map((product) => (
+            {products.map((product) => (
               <TableRow key={product._id}>
                 <TableCell>
-                  <div className="flex items-center gap-3">
+                  <div className="flex gap-3">
                     <Image
                       src={product.thumbnail.url || "/placeholder.svg"}
                       alt={product.title}
                       width={48}
                       height={48}
-                      className="rounded-md object-cover"
+                      className="rounded-md object-cover h-[60px] w-[100px]"
                     />
                     {product.title}
                   </div>
@@ -134,13 +145,27 @@ export function ActiveProductsList() {
                     className="cursor-pointer"
                     onClick={() => setDeleteId(product._id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+
+        {/* Pagination */}
+        {totalPages > 10 && (
+          <div className="flex justify-between items-center mt-4 px-4 py-2">
+            <div className="text-sm text-muted-foreground">
+              Showing {products.length} of {totalItems} products
+            </div>
+            <PacificPagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
       </div>
 
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
@@ -153,12 +178,16 @@ export function ActiveProductsList() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteId(null)} className="cursor-pointer">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteId(null)}
+              className="cursor-pointer"
+            >
               No
             </Button>
             <Button
               variant="destructive"
-               className="cursor-pointer"
+              className="cursor-pointer"
               onClick={() => deleteId && deleteMutation.mutate(deleteId)}
             >
               Yes

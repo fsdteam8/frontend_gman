@@ -560,7 +560,7 @@ export function Navbar() {
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Mission", href: "/mission" },
-    { name: "Why Join", href: "/why-join" },
+    { name: "Why Join?", href: "/why-join" },
     { name: "Become a Seller", href: "/become-seller" },
     { name: "Blog", href: "/blog" },
     { name: "FAQ", href: "/faq" },
@@ -686,7 +686,7 @@ export function Navbar() {
               {isLoggedIn ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="rounded-full focus:outline-none focus:ring-0 focus:ring-offset-0">
+                    <button className="rounded-full focus:outline-none focus:ring-0 focus:ring-offset-0 cursor-pointer">
                       <CircleUser className="h-8 w-8 text-[#039B06]" />
                     </button>
                   </DropdownMenuTrigger>

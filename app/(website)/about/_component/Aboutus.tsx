@@ -2,7 +2,7 @@ import Image from "next/image"
 
 export default function Aboutus() {
   return (
-    <section className="mt-16 sm:mt-20 lg:mt-[100px]">
+    <section className="py-24">
       {/* Navigation */}
       <div className="flex justify-center p-4">
         <h2 className="text-[#039B06] text-sm sm:text-base font-semibold">About Table Fresh</h2>

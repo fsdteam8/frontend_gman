@@ -1,16 +1,30 @@
-"use client"
-import SalesTable from "./_component/SalesTable"
+"use client";
+import SalesTable from "./_component/SalesTable";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function SalesPage() {
-
-
   return (
     <div className="">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My Sales</h1>
-          <p className="text-muted-foreground">Dashboard › My Sales</p>
-        </div>
+      <h1 className="text-2xl font-bold mb-6">My Sales</h1>
+      <div className="mb-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>My Sales</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       {/* <Card className="bg-green-600 text-white">
@@ -27,5 +41,5 @@ export default function SalesPage() {
       </Card> */}
       <SalesTable />
     </div>
-  )
+  );
 }

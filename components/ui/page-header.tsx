@@ -1,25 +1,54 @@
-"use client"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import { Button } from "./button";
+import { Plus } from "lucide-react";
 
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
 
 interface PageHeaderProps {
-  title: string
-  breadcrumb?: string
+  title: string;
+  breadcrumb?: BreadcrumbItem[];
   action?: {
-    label: string
-    href?: string
-    variant?: "default" | "outline"
-    onClick?: () => void
-  }
+    label: string;
+    href?: string;
+    variant?: "default" | "outline";
+    onClick?: () => void;
+  };
 }
+
 
 export function PageHeader({ title, breadcrumb, action }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-2xl font-bold">{title}</h1>
-        {breadcrumb && <p className="text-muted-foreground">{breadcrumb}</p>}
+        <h1 className="text-2xl font-bold mb-1">{title}</h1>
+        {breadcrumb && (
+          <Breadcrumb>
+            <BreadcrumbList>
+              {breadcrumb.map((item, index) => (
+                <div key={index} className="flex items-center">
+                  <BreadcrumbItem>
+                    {item.href ? (
+                      <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                    )}
+                  </BreadcrumbItem>
+                  {index < breadcrumb.length - 1 && <BreadcrumbSeparator />}
+                </div>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        )}
       </div>
       {action && (
         <Button
@@ -32,5 +61,5 @@ export function PageHeader({ title, breadcrumb, action }: PageHeaderProps) {
         </Button>
       )}
     </div>
-  )
+  );
 }

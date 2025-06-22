@@ -339,7 +339,7 @@ export function CreateProductForm({
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                   <div className="space-y-2">
                     <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                    <div>
+                    <div className="flex items-center justify-center">
                       <Label
                         htmlFor="media"
                         className="cursor-pointer text-blue-600 hover:text-blue-500"
@@ -443,7 +443,7 @@ export function CreateProductForm({
                   ) : (
                     <div className="space-y-2">
                       <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div>
+                      <div className="flex items-center justify-center">
                         <Label
                           htmlFor="thumbnail"
                           className="cursor-pointer text-blue-600 hover:text-blue-500"
