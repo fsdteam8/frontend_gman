@@ -9,7 +9,7 @@ const page = () => {
         image="/asset/whyJoin.png"
         title="Join the Food Revolution with Tablefresh"
         gradientColor="0, 115, 2"
-        gradientOpacity={0.4}
+        gradientOpacity={0.0}
       />
       <Reasons />
     </div>

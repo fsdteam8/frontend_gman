@@ -9,7 +9,7 @@ const page = () => {
         image="/asset/contactHeader.png"
         title="Contact Us"
         gradientColor="0, 115, 2"
-        gradientOpacity={0.5}
+        gradientOpacity={0.2}
       />
       <ContactFrom />
     </div>
