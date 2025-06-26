@@ -6,10 +6,10 @@ function Page() {
   return (
     <div>
       <PageHeader
-        image="/asset/aboutUs.png"
+        image="/asset/about-banner.png"
         title="About Us"
         gradientColor="0, 115, 2"
-        gradientOpacity={0.5}
+        gradientOpacity={0.2}
       />
       <Aboutus />
     </div>

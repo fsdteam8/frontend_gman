@@ -7,8 +7,8 @@ export default function HeroSection() {
         style={{
           backgroundImage: `
             linear-gradient(
-              rgba(0, 115, 2, 0.4),
-              rgba(0, 115, 2, 0.4)
+              rgba(0, 115, 2, 0.2),
+              rgba(0, 115, 2, 0.2)
             ),
             url('/asset/home.png')
           `,
