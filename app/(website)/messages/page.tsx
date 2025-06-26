@@ -108,7 +108,7 @@ export default function MessagesPage() {
   // Initialize socket connection
   useEffect(() => {
     if (token) {
-      socketRef.current = io("http://localhost:8001", {
+      socketRef.current = io(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
         transports: ["websocket"],
       });
 
