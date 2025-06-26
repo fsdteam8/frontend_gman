@@ -9,7 +9,7 @@ const page = () => {
         image="/asset/privacy.png"
         title="Privacy Policy "
         gradientColor="0, 115, 2"
-        gradientOpacity={0.4}
+        gradientOpacity={0.2}
       />
       <PrivacyPolicy />
     </div>
