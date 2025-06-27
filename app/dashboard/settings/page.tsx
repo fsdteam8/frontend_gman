@@ -1,656 +1,753 @@
+"use client";
 
+import type React from "react";
+import { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AlertCircle,
+  Pencil,
+  Loader2,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Upload,
+  Trash2,
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { signOut, useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-"use client"
-
-import React, { useState, useEffect } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ChevronRight, Pencil, X, Save, Eye, EyeOff } from "lucide-react"
-import { useSession } from "next-auth/react"
-import { toast } from "sonner"
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
-// Interface for Address
 interface Address {
-  street: string
-  city: string
-  state: string
-  zipCode: string
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
 }
 
-// Interface for Avatar
-interface AvatarData {
-  public_id: string
-  url: string
+interface Avatar {
+  public_id: string;
+  url: string;
 }
 
-// Interface for UserProfile
-interface UserProfile {
-  avatar: AvatarData
-  address: Address
-  _id: string
-  name: string
-  email: string
-  username: string
-  phone: string
-  credit: number | null
-  role: string
-  fine: number
-  uniqueId: string
-  createdAt: string
-  updatedAt: string
-  __v: number
-  farm: string
-  isStripeOnboarded: boolean
-  stripeAccountId: string
+interface ProfileData {
+  _id: string;
+  name: string;
+  email: string;
+  username: string;
+  phone: string;
+  avatar: Avatar | File | null;
+  address: Address;
+  credit: number | null;
+  role: string;
+  fine: number;
+  uniqueId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Generic API Response Interface
 interface ApiResponse<T> {
-  success: boolean
-  message: string
-  data: T
+  success: boolean;
+  message: string;
+  data: T;
 }
 
-// Interface for Update Profile Response
-interface UpdateProfileResponse {
-  user: UserProfile
+interface PasswordChangeResponse {
+  success: boolean;
+  message: string;
 }
 
-// Interface for Change Password Response
-interface ChangePasswordResponse {
-  message: string
+interface PasswordChangeData {
+  oldPassword: string;
+  newPassword: string;
 }
 
-// Interface for Stripe Connect Response
-// interface StripeConnectResponse {
-//   url: string
-// }
-
-// Fetch user profile
-async function fetchUserProfile(token: string | null): Promise<UserProfile> {
-  if (!token) {
-    throw new Error("No authentication token available")
-  }
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  })
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.message || "Failed to fetch profile")
-  }
-
-  const result: ApiResponse<UserProfile> = await response.json()
-  return result.data
-}
-
-// Payload for updating profile
-interface UpdateProfilePayload {
-  name: string
-  username: string
-  phone: string
-  street: string
-  city: string
-  state: string
-  zipCode: string
-}
-
-// Update user profile
-async function updateUserProfile(payload: UpdateProfilePayload, token: string | null): Promise<UpdateProfileResponse> {
-  if (!token) {
-    throw new Error("No authentication token available")
-  }
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/update-profile`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.message || "Failed to update profile")
-  }
-
-  const result: ApiResponse<UpdateProfileResponse> = await response.json()
-  return result.data
-}
-
-// Payload for changing password
-interface ChangePasswordPayload {
-  currentPassword: string
-  newPassword: string
-  confirmPassword: string
-}
-
-// Change user password
-async function changeUserPassword(payload: ChangePasswordPayload, token: string | null): Promise<ChangePasswordResponse> {
-  if (!token) {
-    throw new Error("No authentication token available")
-  }
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/change-password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.message || "Failed to change password")
-  }
-
-  const result: ApiResponse<ChangePasswordResponse> = await response.json()
-  return result.data
-}
-
-// Payload for Stripe connect
-// interface StripeConnectPayload {
-//   userId: string
-// }
-
-// Connect Stripe account
-// async function connectStripeAccount(payload: StripeConnectPayload, token: string | null): Promise<StripeConnectResponse> {
-//   if (!token) {
-//     throw new Error("No authentication token available")
-//   }
-//   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment/connect`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify(payload),
-//   })
-
-//   if (!response.ok) {
-//     const errorData = await response.json()
-//     throw new Error(errorData.message || "Failed to connect Stripe account")
-//   }
-
-//   return response.json()
-// }
-
-export default function SettingsPage() {
-  const queryClient = useQueryClient()
-  const { data: session, status } = useSession()
-  const token = session?.accessToken ?? null
-
-  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false)
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  // Fetch user profile
-  const {
-    data: userProfile,
-    isLoading: isLoadingProfile,
-    isError: isErrorProfile,
-    error: profileError,
-  } = useQuery<UserProfile, Error>({
-    queryKey: ["userProfile", token],
-    queryFn: () => fetchUserProfile(token),
-    enabled: !!token && status === "authenticated",
-  })
-
-  // Profile form state
-  const [profileFormData, setProfileFormData] = useState({
-    name: "",
-    username: "",
-    email: "",
-    phone: "",
-    street: "",
-    city: "",
-    state: "",
-    zipCode: "",
-  })
-
-  // Sync profile form data when userProfile changes
-  useEffect(() => {
-    if (userProfile) {
-      setProfileFormData({
-        name: userProfile.name || "",
-        username: userProfile.username || "",
-        email: userProfile.email || "",
-        phone: userProfile.phone || "",
-        street: userProfile.address?.street || "",
-        city: userProfile.address?.city || "",
-        state: userProfile.address?.state || "",
-        zipCode: userProfile.address?.zipCode || "",
-      })
-    }
-  }, [userProfile])
-
-  // Update profile mutation
-  const updateProfileMutation = useMutation<UpdateProfileResponse, Error, UpdateProfilePayload>({
-    mutationFn: (payload) => updateUserProfile(payload, token),
-    onSuccess: () => {
-      toast.success("Profile updated successfully.")
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] })
-      setIsEditingProfile(false)
-    },
-    onError: (err) => {
-      toast.error(err.message || "Failed to update profile. Please try again.")
-    },
-  })
-
-  // Stripe connect mutation
-  // const stripeConnectMutation = useMutation<StripeConnectResponse, Error, StripeConnectPayload>({
-  //   mutationFn: (payload) => connectStripeAccount(payload, token),
-  //   onSuccess: (data) => {
-  //     window.location.href = data.url
-  //   },
-  //   onError: (err) => {
-  //     toast.error(err.message || "Failed to connect Stripe account. Please try again.")
-  //   },
-  // })
-
-  // Handle profile form changes
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setProfileFormData((prev) => ({ ...prev, [id]: value }))
-  }
-
-  // Handle profile form submission
-  const handleProfileSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Basic validation
-    if (!profileFormData.name || !profileFormData.username) {
-      toast.error("Name and username are required.")
-      return
-    }
-    updateProfileMutation.mutate({
-      name: profileFormData.name,
-      username: profileFormData.username,
-      phone: profileFormData.phone,
-      street: profileFormData.street,
-      city: profileFormData.city,
-      state: profileFormData.state,
-      zipCode: profileFormData.zipCode,
-    })
-  }
-
-  // Cancel profile edit
-  const handleCancelProfileEdit = () => {
-    if (userProfile) {
-      setProfileFormData({
-        name: userProfile.name || "",
-        username: userProfile.username || "",
-        email: userProfile.email || "",
-        phone: userProfile.phone || "",
-        street: userProfile.address?.street || "",
-        city: userProfile.address?.city || "",
-        state: userProfile.address?.state || "",
-        zipCode: userProfile.address?.zipCode || "",
-      })
-    }
-    setIsEditingProfile(false)
-  }
-
-  // Password form state
-  const [passwordFormData, setPasswordFormData] = useState({
-    currentPassword: "",
+export default function BuyerProfile() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [formData, setFormData] = useState<Partial<ProfileData>>({});
+  const [passwordData, setPasswordData] = useState<PasswordChangeData>({
+    oldPassword: "",
     newPassword: "",
-    confirmPassword: "",
-  })
+  });
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const session = useSession();
+  const token = session.data?.accessToken;
+  const router = useRouter();
 
-  // Change password mutation
-  const changePasswordMutation = useMutation<ChangePasswordResponse, Error, ChangePasswordPayload>({
-    mutationFn: (payload) => changeUserPassword(payload, token),
+  const fetchProfile = async (): Promise<ApiResponse<ProfileData>> => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized - Please login again");
+      }
+      throw new Error("Failed to fetch profile");
+    }
+    return response.json();
+  };
+
+  const updateProfile = async (
+    profileData: Partial<ProfileData> & { avatar?: File | null }
+  ): Promise<ApiResponse<ProfileData>> => {
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", profileData.name || "");
+    formDataToSend.append("username", profileData.username || "");
+    formDataToSend.append("phone", profileData.phone || "");
+    formDataToSend.append("street", profileData.address?.street || "");
+    formDataToSend.append("city", profileData.address?.city || "");
+    formDataToSend.append("state", profileData.address?.state || "");
+    formDataToSend.append("zipCode", profileData.address?.zipCode || "");
+    if (profileData.avatar !== undefined) {
+      if (profileData.avatar === null) {
+        formDataToSend.append("avatar", "");
+      } else {
+        formDataToSend.append("avatar", profileData.avatar);
+      }
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/user/update-profile`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized - Please login again");
+      }
+      throw new Error("Failed to update profile");
+    }
+    return response.json();
+  };
+
+  const changePassword = async (
+    passwordData: PasswordChangeData
+  ): Promise<PasswordChangeResponse> => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(passwordData),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to change password");
+    }
+    return response.json();
+  };
+
+  const {
+    data: profileResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: fetchProfile,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateProfile,
     onSuccess: () => {
-      toast.success("Password changed successfully.")
-      setPasswordFormData({
-        currentPassword: "",
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      setIsEditing(false);
+      setFormData({});
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      toast.success("Profile updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update profile");
+    },
+  });
+
+  const passwordMutation = useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      toast.success("Password changed successfully");
+      setShowPasswordChange(false);
+      setPasswordData({
+        oldPassword: "",
         newPassword: "",
-        confirmPassword: "",
-      })
-      setShowChangePasswordForm(false)
-      setShowCurrentPassword(false)
-      setShowNewPassword(false)
-      setShowConfirmPassword(false)
+      });
     },
-    onError: (err) => {
-      toast.error(err.message || "Failed to change password. Please try again.")
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to change password");
     },
-  })
+  });
 
-  // Handle password form changes
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setPasswordFormData((prev) => ({ ...prev, [id]: value }))
-  }
+  const profile = profileResponse?.data;
 
-  // Handle password form submission
+  const handleEditClick = () => {
+    if (!isEditing && profile) {
+      setFormData({
+        name: profile.name,
+        username: profile.username,
+        email: profile.email,
+        phone: profile.phone,
+        address: profile.address,
+        avatar: profile.avatar,
+      });
+      setImagePreview(
+        profile.avatar && !(profile.avatar instanceof File)
+          ? profile.avatar.url
+          : null
+      );
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    if (field.startsWith("address.")) {
+      const addressField = field.split(".")[1] as keyof Address;
+      setFormData((prev) => ({
+        ...prev,
+        address: {
+          ...prev.address,
+          [addressField]: value,
+        } as Address,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
+  const handlePasswordChange = (
+    field: keyof PasswordChangeData,
+    value: string
+  ) => {
+    setPasswordData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.includes("image/")) {
+        toast.error("Please select an image file.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast.error("Image size must be less than 5MB.");
+        return;
+      }
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSave = () => {
+    updateMutation.mutate({
+      ...formData,
+      avatar: selectedImage !== undefined ? selectedImage : profile?.avatar ? undefined : null,
+    });
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setFormData({});
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      toast.success("Logged out successfully!");
+      router.push("/");
+    } catch (error) {
+      toast.error("Failed to log out: " + (error as Error).message);
+    }
+  };
+
   const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Validate passwords
-    if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
-      toast.error("New password and confirm password do not match.")
-      return
+    e.preventDefault();
+    passwordMutation.mutate(passwordData);
+  };
+
+  const togglePasswordChange = () => {
+    setShowPasswordChange(!showPasswordChange);
+    if (isEditing) {
+      setIsEditing(false);
+      setFormData({});
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
-    if (passwordFormData.newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long.")
-      return
-    }
-    changePasswordMutation.mutate(passwordFormData)
-  }
+  };
 
-  // Handle Stripe connect button click
-  // const handleStripeConnect = () => {
-  //   if (userProfile?._id) {
-  //     stripeConnectMutation.mutate({ userId: userProfile._id })
-  //   } else {
-  //     toast.error("User profile not loaded. Please try again.")
-  //   }
-  // }
-
-  // Authentication check
-  if (status === "loading") {
-    return <div className="flex flex-col min-h-screen p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">Loading...</div>
-  }
-
-  if (status === "unauthenticated") {
-    return <div className="flex flex-col min-h-screen p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">Please sign in to view this page.</div>
-  }
-
-  // Loading state
-  if (isLoadingProfile) {
-    return <div className="flex flex-col min-h-screen p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">Loading profile...</div>
-  }
-
-  // Error state
-  if (isErrorProfile) {
+  if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen p-4">
-        Error loading profile: {profileError?.message || "Unknown error"}
+      <div className="container mx-auto py-8 md:py-12">
+        <h1 className="mb-8 text-3xl font-bold">Profile</h1>
+        <div className="grid gap-8 md:grid-cols-3">
+          <div className="md:col-span-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-16 w-16 rounded-full" />
+                  <div>
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-10 w-16" />
+              </CardHeader>
+            </Card>
+          </div>
+          <div className="md:col-span-3">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-10" />
+                  <Skeleton className="h-10" />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-10" />
+                  <Skeleton className="h-10" />
+                </div>
+                <Skeleton className="h-10" />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Skeleton className="h-10" />
+                  <Skeleton className="h-10" />
+                  <Skeleton className="h-10" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-    )
+    );
   }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8 md:py-12">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error.message.includes("Unauthorized")
+              ? "Session expired. Please login again."
+              : "Failed to load profile data. Please try again later."}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1">
-        <div>
-          {/* Breadcrumbs and Add Stripe Account Button */}
-          <h2 className="text-2xl font-semibold text-[#272727]">Settings</h2>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center text-sm text-gray-500">
-              <span>Dashboard</span>
-              <ChevronRight className="w-4 h-4 mx-1" />
-              <span>Settings</span>
-            </div>
-          </div>
+    <div className="container mx-auto py-8 md:py-12">
+      <h1 className="mb-8 text-3xl font-bold">Profile</h1>
 
-          {/* Conditional Rendering of Forms */}
-          {showChangePasswordForm ? (
-            // Change Password Form
-            <form onSubmit={handlePasswordSubmit} className="grid grid-cols-1 gap-6">
-              <h2 className="text-xl font-semibold mb-4">Change Password</h2>
-              <div className="space-y-2 relative">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  type={showCurrentPassword ? "text" : "password"}
-                  value={passwordFormData.currentPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                />
-                <button
-                  type="button"
-                  className="absolute right-2 top-9 text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              <div className="space-y-2 relative">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type={showNewPassword ? "text" : "password"}
-                  value={passwordFormData.newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                />
-                <button
-                  type="button"
-                  className="absolute right-2 top-9 text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              <div className="space-y-2 relative">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={passwordFormData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                />
-                <button
-                  type="button"
-                  className="absolute right-2 top-9 text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-
-              <div className="flex justify-end space-x-4 mt-6">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="text-gray-600 hover:bg-gray-100"
-                  onClick={() => setShowChangePasswordForm(false)}
-                  disabled={changePasswordMutation.isPending}
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-[#039B06] hover:bg-[#039B06]/80 text-white"
-                  disabled={changePasswordMutation.isPending}
-                >
-                  {changePasswordMutation.isPending ? "Saving..." : "Save Password"}
-                  <Save className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </form>
-          ) : (
-            // Profile Settings Form
-            <>
-              {/* Profile Section */}
-              <div className="flex flex-col md:flex-row items-center md:justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="w-20 h-20">
+      <div className="grid gap-8 md:grid-cols-3">
+        <div className="md:col-span-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Avatar className="h-16 w-16 border">
                     <AvatarImage
-                      src={userProfile?.avatar?.url || "/placeholder.svg?height=80&width=80"}
-                      alt={userProfile?.name || "User Avatar"}
+                      src={
+                        imagePreview ||
+                        (profile.avatar && !(profile.avatar instanceof File)
+                          ? profile.avatar.url
+                          : "/placeholder.svg?height=64&width=64")
+                      }
+                      alt={`@${profile.username}`}
                     />
-                    <AvatarFallback>
-                      {userProfile?.name ? userProfile.name.substring(0, 2).toUpperCase() : "US"}
-                    </AvatarFallback>
+                    <AvatarFallback>{getInitials(profile.name)}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h2 className="text-xl font-semibold">{userProfile?.name || "User"}</h2>
-                    <p className="text-gray-500">@{userProfile?.username || "username"}</p>
-                  </div>
-                </div>
-                <div className="flex space-x-4 mt-4 md:mt-0">
-                  <Button
-                    variant="outline"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setShowChangePasswordForm(true)}
-                  >
-                    Change Password
-                  </Button>
-                  {!isEditingProfile ? (
-                    <Button
-                      className="bg-[#039B06] hover:bg-[#039B06] text-white"
-                      onClick={() => setIsEditingProfile(true)}
-                    >
-                      <Pencil className="w-4 h-4 mr-2" />
-                      Update Profile
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-
-              {/* Profile Form */}
-              <form onSubmit={handleProfileSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="name">
-                    Full Name
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={profileFormData.name}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    required={isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="username">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    value={profileFormData.username}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    required={isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="email">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profileFormData.email}
-                    readOnly={true}
-                    onChange={handleProfileChange}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="phone">
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={profileFormData.phone}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="street">
-                    Street
-                  </Label>
-                  <Input
-                    id="street"
-                    type="text"
-                    value={profileFormData.street}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="city">
-                    City
-                  </Label>
-                  <Input
-                    id="city"
-                    type="text"
-                    value={profileFormData.city}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="state">
-                    State
-                  </Label>
-                  <Input
-                    id="state"
-                    type="text"
-                    value={profileFormData.state}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-base text-[#707070] font-normal" htmlFor="zipCode">
-                    Zip Code
-                  </Label>
-                  <Input
-                    id="zipCode"
-                    type="text"
-                    value={profileFormData.zipCode}
-                    onChange={handleProfileChange}
-                    readOnly={!isEditingProfile}
-                    className="h-[50px] rounded-[4px] text-base text-[#272727] font-normal"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                {isEditingProfile && (
-                  <div className="md:col-span-2 flex justify-end space-x-4 mt-6">
+                  {isEditing && imagePreview && (
                     <Button
                       type="button"
-                      variant="ghost"
-                      className="text-gray-600 hover:bg-gray-100"
-                      onClick={handleCancelProfileEdit}
-                      disabled={updateProfileMutation.isPending}
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={handleRemoveImage}
                     >
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
+                      <Trash2 className="h-3 w-3" />
                     </Button>
+                  )}
+                </div>
+                <div>
+                  <CardTitle>{profile.name}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    @{profile.username}
+                  </p>
+                </div>
+              </div>
+              {!showPasswordChange && (
+                <Button
+                  variant="outline"
+                  className="gap-1"
+                  onClick={handleEditClick}
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+            </CardHeader>
+            {isEditing && (
+              <CardContent>
+                <div className="grid gap-4">
+                  <Label htmlFor="avatar">Profile Image</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      ref={fileInputRef}
+                      className="w-auto"
+                    />
                     <Button
-                      type="submit"
-                      className="bg-[#039B06] hover:bg-[#039B06] text-white"
-                      disabled={updateProfileMutation.isPending}
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        fileInputRef.current?.click();
+                      }}
                     >
-                      {updateProfileMutation.isPending ? "Saving..." : "Save"}
-                      <Save className="w-4 h-4 ml-2" />
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Image
                     </Button>
                   </div>
-                )}
-              </form>
-            </>
-          )}
+                </div>
+              </CardContent>
+            )}
+          </Card>
         </div>
-      </main>
+
+        <div className="md:col-span-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>
+                {showPasswordChange ? "Change Password" : "Personal Information"}
+              </CardTitle>
+              <div className="flex gap-2">
+                {showPasswordChange ? (
+                  <Button variant="outline" onClick={togglePasswordChange}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Profile
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" onClick={togglePasswordChange}>
+                      Change Password
+                    </Button>
+                    <Button variant="outline" onClick={handleLogout}>
+                      Log Out
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="gap-1 md:hidden"
+                      onClick={handleEditClick}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {showPasswordChange ? (
+                <form className="grid gap-6" onSubmit={handlePasswordSubmit}>
+                  <div className="grid gap-2">
+                    <Label htmlFor="old-password">Current Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="old-password"
+                        type={showOldPassword ? "text" : "password"}
+                        placeholder="Enter your current password"
+                        value={passwordData.oldPassword}
+                        onChange={(e) =>
+                          handlePasswordChange("oldPassword", e.target.value)
+                        }
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                      >
+                        {showOldPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="new-password">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="new-password"
+                        type={showNewPassword ? "text" : "password"}
+                        placeholder="Enter your new password"
+                        value={passwordData.newPassword}
+                        onChange={(e) =>
+                          handlePasswordChange("newPassword", e.target.value)
+                        }
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      type="submit"
+                      className="bg-green-600 hover:bg-green-700"
+                      disabled={passwordMutation.isPending}
+                    >
+                      {passwordMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Change Password
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <form
+                  className="grid gap-6"
+                  onSubmit={(e) => e.preventDefault()}
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                      <Label htmlFor="full-name">Full Name</Label>
+                      <Input
+                        id="full-name"
+                        placeholder="Enter your full name"
+                        value={isEditing ? formData.name || "" : profile.name}
+                        onChange={(e) =>
+                          handleInputChange("name", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="username">User name</Label>
+                      <Input
+                        id="username"
+                        placeholder="Enter your username"
+                        value={
+                          isEditing ? formData.username || "" : profile.username
+                        }
+                        onChange={(e) =>
+                          handleInputChange("username", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={isEditing ? formData.email || "" : profile.email}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        value={isEditing ? formData.phone || "" : profile.phone}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="address">Street</Label>
+                    <Input
+                      id="address"
+                      placeholder="Enter your address"
+                      value={
+                        isEditing
+                          ? formData.address?.street || ""
+                          : profile.address.street
+                      }
+                      onChange={(e) =>
+                        handleInputChange("address.street", e.target.value)
+                      }
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        placeholder="Enter your city"
+                        value={
+                          isEditing
+                            ? formData.address?.city || ""
+                            : profile.address.city
+                        }
+                        onChange={(e) =>
+                          handleInputChange("address.city", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        placeholder="Enter your state"
+                        value={
+                          isEditing
+                            ? formData.address?.state || ""
+                            : profile.address.state
+                        }
+                        onChange={(e) =>
+                          handleInputChange("address.state", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="zip">Zip Code</Label>
+                      <Input
+                        id="zip"
+                        placeholder="Enter your zip code"
+                        value={
+                          isEditing
+                            ? formData.address?.zipCode || ""
+                            : profile.address.zipCode
+                        }
+                        onChange={(e) =>
+                          handleInputChange("address.zipCode", e.target.value)
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                  {isEditing && (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={handleCancel}
+                        disabled={updateMutation.isPending}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={handleSave}
+                        disabled={updateMutation.isPending}
+                      >
+                        {updateMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Save Changes
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

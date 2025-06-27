@@ -32,8 +32,6 @@ interface CreateProductFormProps {
 }
 interface Media {
   url: string;
-  // Add other properties if your media objects have more fields
-  // e.g., _id: string;
 }
 
 export function CreateProductForm({
@@ -335,7 +333,7 @@ export function CreateProductForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Product media</Label>
+                <Label>Product Media</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                   <div className="space-y-2">
                     <Upload className="mx-auto h-8 w-8 text-gray-400" />
@@ -366,24 +364,27 @@ export function CreateProductForm({
                     <Label className="text-sm font-medium">
                       Selected Images ({mediaPreviews.length})
                     </Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="grid grid-cols-4 gap-3 mt-2">
                       {mediaPreviews.map((preview, index) => (
-                        <div key={index} className="relative">
+                        <div
+                          key={index}
+                          className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                        >
                           <Image
                             src={preview || "/placeholder.svg"}
                             alt={`Product image ${index + 1}`}
-                            className="w-full h-20 object-cover rounded-md"
-                            width={800}
-                            height={800}
+                            className="w-full h-32 object-cover"
+                            width={150}
+                            height={150}
                           />
                           <Button
                             type="button"
                             variant="destructive"
                             size="sm"
-                            className="absolute top-1 right-1 h-6 w-6 p-0"
+                            className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
                             onClick={() => removeMediaImage(index)}
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
                       ))}
@@ -417,7 +418,7 @@ export function CreateProductForm({
               </div>
 
               <div className="space-y-2">
-                <Label>Product thumbnail Image</Label>
+                <Label>Product Thumbnail Image</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   {thumbnailPreview ? (
                     <div className="space-y-2">

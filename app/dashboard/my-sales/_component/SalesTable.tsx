@@ -33,20 +33,52 @@ export default function SalesTable() {
     return (
       <>
         <div className="text-xl text-[#272727] font-medium">Sales History</div>
-        <Card>
+        <Card className="shadow-none border-none bg-transparent">
           <CardContent>
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-4 w-20" />
-                </div>
-              ))}
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="text-base text-[#272727] font-medium">
+                  <TableHead>Order Code</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Total Sell Amount</TableHead>
+                  <TableHead>Admin Charge</TableHead>
+                  <TableHead>My Revenue</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow className="h-[70px]" key={index}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-16" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </>
@@ -84,7 +116,7 @@ export default function SalesTable() {
           <>
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="text-base text-[#272727] font-medium">
                   <TableHead>Order Code</TableHead>
                   <TableHead>Product</TableHead>
                   <TableHead>Customer</TableHead>
@@ -100,33 +132,33 @@ export default function SalesTable() {
               <TableBody>
                 {sales.map((sale, index) => (
                   <TableRow
-                    className="h-[70px]"
+                    className="h-[70px] text-[18px] text-[#323232] font-medium"
                     key={`${sale.orderId}-${sale.productId}-${index}`}
                   >
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       {sale.orderCode}
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm text-[#131313] font-normal">
+                      <div className="">
                         {sale.productTitle}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       {sale.customer}
                     </TableCell>
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       {sale.quantity} box
                     </TableCell>
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       {sale.date}
                     </TableCell>
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       ${sale.totalSellAmount.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       ${sale.adminCharge.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-sm text-[#131313] font-normal">
+                    <TableCell className="">
                       ${sale.myRevenue.toFixed(2)}
                     </TableCell>
                   </TableRow>
