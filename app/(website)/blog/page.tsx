@@ -6,10 +6,10 @@ const page = () => {
   return (
     <div>
       <PageHeader
-        image="/asset/blogHeader.png"
+        image="/asset/blogbanner.jpg"
         title="Our Blog"
         gradientColor="0, 115, 2"
-        gradientOpacity={0.4}
+        gradientOpacity={0.2}
       />
       <Blog />
     </div>

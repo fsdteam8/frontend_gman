@@ -9,7 +9,7 @@ const page = () => {
         image="/asset/terms.png"
         title="Terms & Conditions"
         gradientColor="0, 115, 2"
-        gradientOpacity={0.4}
+        gradientOpacity={0.2}
       />
       <TermsConditions />
     </div>

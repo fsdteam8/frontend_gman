@@ -35,7 +35,7 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
   state,
 }) => {
   const { data: session } = useSession();
-
+   console.log(profileImage, "profileImage");
   const [loading, setLoading] = useState(false);
   const token = session?.accessToken;
   const router = useRouter();

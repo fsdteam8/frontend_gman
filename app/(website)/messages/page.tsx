@@ -108,7 +108,7 @@ export default function MessagesPage() {
   // Initialize socket connection
   useEffect(() => {
     if (token) {
-      socketRef.current = io("http://localhost:8001", {
+      socketRef.current = io(`${process.env.NEXT_PUBLIC_SOCKET_URL}`, {
         transports: ["websocket"],
       });
 
@@ -331,7 +331,7 @@ export default function MessagesPage() {
         image="/asset/messgeHeader.png"
         title="Stay Connected With Your Favorite Farms"
         gradientColor="0, 115, 2"
-        gradientOpacity={0.5}
+        gradientOpacity={0.2}
       />
 
       <div className="container mx-auto px-4 py-24">
