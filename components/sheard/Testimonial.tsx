@@ -176,7 +176,7 @@ export default function TestimonialCarousel() {
                               className={`w-5 h-5 ${
                                 i < review.rating
                                   ? "text-yellow-400 fill-yellow-400"
-                                  : "text-gray-300"
+                                  : "text-[#595959] fill-[#595959]"
                               }`}
                             />
                           ))}
