@@ -27,8 +27,17 @@ interface Product {
   title: string;
   price: number;
   thumbnail: {
+    public_id: string;
     url: string;
   };
+  category: string;
+  code: string;
+  createdAt: string;
+  farm: string;
+  quantity: string;
+  status: string;
+  updatedAt: string;
+  __v: number;
 }
 
 interface OrderProduct {
@@ -36,17 +45,41 @@ interface OrderProduct {
   quantity: number;
   price: number;
   totalPrice: number;
+  _id: string;
+}
+
+interface Customer {
+  _id: string;
+  name: string;
+  email: string;
+  username: string;
+  phone: string;
+}
+
+interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
 }
 
 interface ApiOrder {
   _id: string;
   products: OrderProduct[];
-  totalPrice: number;
+  totalAmount: number;
+  totalPrice?: number;
   status: string;
   paymentStatus: string;
   code: string;
   date: string;
-  customer: string;
+  customer: Customer;
+  address: Address;
+  adminCommission: number;
+  sellerRevenue: number;
+  farm: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 interface ApiResponse {
@@ -74,7 +107,7 @@ export default function OrdersList() {
 
   const fetchOrders = async (): Promise<TransformedOrder[]> => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/order/my`,
+      `${process.env.NEXT_PUBLIC_API_URL}/order/vendor`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,33 +116,44 @@ export default function OrdersList() {
       }
     );
 
-    if (!response.ok) throw new Error("Failed to fetch orders");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch orders: ${response.status} ${errorText}`);
+    }
 
     const result: ApiResponse = await response.json();
+    console.log(result.data);
 
-    return result.data.map((order) => ({
-      id: order._id,
-      customer: order.customer,
-      product:
-        order.products.length > 1
-          ? `${order.products[0].product.title} (+${
-              order.products.length - 1
-            } more)`
-          : order.products[0]?.product.title || "No products",
-      orderId: order.code,
-      totalPrice: order.totalPrice,
-      date: new Date(order.date).toLocaleString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }),
-      status: order.status,
-      image: order.products[0]?.product.thumbnail.url || "/placeholder.svg",
-      products: order.products,
-    }));
+    return result.data.map((order) => {
+      const firstProduct = order.products[0]?.product;
+      const thumbnailUrl = firstProduct?.thumbnail?.url || "/placeholder.svg";
+
+      console.log(thumbnailUrl)
+
+      return {
+        id: order._id,
+        customer: order.customer.name,
+        product:
+          order.products.length > 0
+            ? order.products.length > 1
+              ? `${firstProduct.title} (+${order.products.length - 1} more)`
+              : firstProduct.title
+            : "No products",
+        orderId: order.code,
+        totalPrice: order.totalAmount || order.totalPrice || 0,
+        date: new Date(order.date).toLocaleString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }),
+        status: order.status,
+        image: thumbnailUrl,
+        products: order.products,
+      };
+    });
   };
 
   const {
@@ -118,7 +162,7 @@ export default function OrdersList() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", token],
     queryFn: fetchOrders,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -140,7 +184,8 @@ export default function OrdersList() {
       );
 
       if (!res.ok) {
-        throw new Error("Failed to update status");
+        const errorText = await res.text();
+        throw new Error(`Failed to update status: ${res.status} ${errorText}`);
       }
 
       return res.json();
@@ -148,7 +193,8 @@ export default function OrdersList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
-    onError: () => {
+    onError: (error: Error) => {
+      console.error("Update status error:", error);
       alert("Failed to update order status.");
     },
   });
@@ -320,10 +366,10 @@ export default function OrdersList() {
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Image
-                    src={order.image || "/placeholder.svg"}
-                    alt={order.product}
-                    width={48}
-                    height={48}
+                    src={order.image}
+                    alt={order.product || "Product image"}
+                    width={100}
+                    height={60}
                     className="rounded-md object-cover h-[60px] w-[100px]"
                   />
                   <div>
@@ -336,9 +382,9 @@ export default function OrdersList() {
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="">{order.orderId}</TableCell>
-              <TableCell className="">
-                ${order.totalPrice}
+              <TableCell className="font-mono">{order.orderId}</TableCell>
+              <TableCell className="font-semibold">
+                ${order.totalPrice.toFixed(2)}
               </TableCell>
               <TableCell className="">{order.date}</TableCell>
               <TableCell>

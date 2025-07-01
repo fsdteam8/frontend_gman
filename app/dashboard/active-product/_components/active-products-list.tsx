@@ -30,6 +30,7 @@ interface Product {
   title: string;
   price: number;
   quantity: string;
+  code: string;
   createdAt: string;
   thumbnail: {
     url: string;
@@ -66,9 +67,15 @@ export function ActiveProductsList() {
 
   // Assuming API returns something like:
   // { data: Product[], total: number, totalPage: number }
+
+
+
   const products: Product[] = data?.data || [];
+
   const totalPages = data?.totalPage || 1;
   const totalItems = data?.total || 0;
+
+    console.log(products)
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -194,7 +201,7 @@ export function ActiveProductsList() {
                     {product.title}
                   </div>
                 </TableCell>
-                <TableCell>{product._id}</TableCell>
+                <TableCell>{product.code}</TableCell>
                 <TableCell>${product.price.toFixed(2)}</TableCell>
                 <TableCell>{product.quantity}</TableCell>
                 <TableCell>
