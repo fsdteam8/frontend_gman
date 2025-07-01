@@ -470,7 +470,8 @@ const Featured_Farms = () => {
 
     // Render first 4 farm cards
     firstFourFarms.forEach((farm) => {
-      const hasProfileImage = farm.seller?.avatar?.url || farm.profileImage
+      const hasProfileImage = farm.seller?.avatar.url 
+      console.log(hasProfileImage);
 
       items.push(
         <FarmsCard
@@ -483,7 +484,7 @@ const Featured_Farms = () => {
           image={farm.images?.[0]?.url || "/placeholder.svg?height=260&width=320"}
           profileImage={
             hasProfileImage
-              ? farm.seller?.avatar?.url || farm.profileImage || "/placeholder.svg?height=260&width=320"
+              ? farm.seller?.avatar?.url || farm.profileImage || "/placeholder.svg?height=50&width=50&text=" + encodeURIComponent(getFirstLetter(farm.name || "F"))
               : "/placeholder.svg?height=50&width=50&text=" + encodeURIComponent(getFirstLetter(farm.name || "F"))
           }
           description={farm.description || "No description available"}

@@ -10,7 +10,7 @@ export default function PageHeader({
   title,
   image,
   gradientColor = "0, 115, 2",
-  gradientOpacity = 0.4,
+  gradientOpacity = 0.2,
 }: PageHeaderProps) {
   const backgroundImage = image
     ? `linear-gradient(rgba(${gradientColor}, ${gradientOpacity}), rgba(${gradientColor}, ${gradientOpacity})), url('${image}')`
