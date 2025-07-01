@@ -12,8 +12,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-// Define TypeScript interfaces for the API response
 interface Category {
   _id: string;
   name: string;
@@ -36,16 +36,24 @@ interface ApiResponse {
   };
 }
 
-export default function Searchbar() {
+interface SearchbarProps {
+  searchParams?: {
+    search?: string;
+    category?: string;
+  };
+}
+
+export default function Searchbar({ searchParams }: SearchbarProps) {
   const session = useSession();
   const token = session?.data?.accessToken;
+  const router = useRouter();
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>(searchParams?.search || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams?.category || "all");
 
   const fetchCategories = async (): Promise<Category[]> => {
     if (!token) {
-      throw new Error("No authentication token found");
+      return [];
     }
 
     const response = await fetch(
@@ -60,7 +68,7 @@ export default function Searchbar() {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch categories");
+      return [];
     }
 
     const data: ApiResponse = await response.json();
@@ -75,15 +83,28 @@ export default function Searchbar() {
   const handleSearch = () => {
     const params = new URLSearchParams();
 
-    if (searchQuery) {
-      params.set("search", searchQuery);
+    if (searchQuery.trim()) {
+      params.set("search", searchQuery.trim());
     }
+
     if (selectedCategory !== "all") {
       params.set("category", selectedCategory);
     }
 
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.pushState(null, "", newUrl);
+    const queryString = params.toString();
+    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+    router.push(newUrl, { scroll: false });
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    const params = new URLSearchParams();
+    if (selectedCategory !== "all") {
+      params.set("category", selectedCategory);
+    }
+    const queryString = params.toString();
+    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+    router.push(newUrl, { scroll: false });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -103,7 +124,6 @@ export default function Searchbar() {
                 Where
               </label>
               <div className="relative">
-               
                 <Input
                   type="text"
                   placeholder="Search destinations"
@@ -112,6 +132,14 @@ export default function Searchbar() {
                   onKeyDown={handleKeyDown}
                   className="border-0 text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-12 w-full"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -120,11 +148,23 @@ export default function Searchbar() {
           <div className="flex-1 sm:pl-3 md:pl-4 lg:pl-6">
             <div className="space-y-1 sm:space-y-1.5">
               <label className="text-xs sm:text-sm font-semibold text-gray-900 hidden lg:block uppercase sm:normal-case tracking-wide sm:tracking-normal">
-               Filter by Category
+                Filter by Category
               </label>
               <Select
                 value={selectedCategory}
-                onValueChange={(value) => setSelectedCategory(value)}
+                onValueChange={(value) => {
+                  setSelectedCategory(value);
+                  const params = new URLSearchParams();
+                  if (searchQuery.trim()) {
+                    params.set("search", searchQuery.trim());
+                  }
+                  if (value !== "all") {
+                    params.set("category", value);
+                  }
+                  const queryString = params.toString();
+                  const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+                  router.push(newUrl, { scroll: false });
+                }}
               >
                 <SelectTrigger className="border-0 focus:ring-0 focus:ring-offset-0 bg-transparent text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-12 w-full cursor-pointer">
                   <SelectValue placeholder="All" />
