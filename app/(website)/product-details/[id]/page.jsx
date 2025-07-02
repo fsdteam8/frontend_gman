@@ -172,7 +172,7 @@ export default function Page() {
 
   return (
     <div className="mt-16">
-      <div className="container mx-auto px-4 py-6 sm:py-8 shadow-2xl mb-24">
+      <div className="container mx-auto px-4 py-6 sm:py-8 shadow-md mb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 mb-8">
           {/* Image Gallery */}
           <div className="space-y-4">
@@ -573,7 +573,7 @@ export default function Page() {
                                   ))}
                                   <span className="text-xs sm:text-sm text-gray-500 ml-3">
                                     {new Date(
-                                      review.createdAt || product.updatedAt
+                                      review.date
                                     ).toLocaleDateString("en-US", {
                                       month: "short",
                                       day: "numeric",
