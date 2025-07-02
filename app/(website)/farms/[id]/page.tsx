@@ -425,7 +425,7 @@ export default function FarmPage() {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-sm sm:text-base text-[#111827]">
-                        ${product.price} per {product.quantity}
+                        ${product.price} per Box
                       </span>
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-[#FACC15] text-[#FACC15]" />
