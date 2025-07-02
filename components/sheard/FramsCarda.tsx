@@ -67,7 +67,7 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
 
       if (data.success) {
         // Redirect to the chat page with the chat ID
-        router.push(`/messages/${data.data._id}`);
+        router.push(`/messages/`);
         toast.success("Chat is opening...");
       } else {
         throw new Error(data.message || "Failed to create chat");
