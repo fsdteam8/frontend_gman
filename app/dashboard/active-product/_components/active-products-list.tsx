@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
@@ -18,10 +18,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import PacificPagination from "@/components/ui/PacificPagination";
 
@@ -30,6 +30,7 @@ interface Product {
   title: string;
   price: number;
   quantity: string;
+  code: string;
   createdAt: string;
   thumbnail: {
     url: string;
@@ -67,9 +68,14 @@ export function ActiveProductsList() {
   // Assuming API returns something like:
   // { data: Product[], total: number, totalPage: number }
 
+
+
   const products: Product[] = data?.data || [];
+
   const totalPages = data?.totalPage || 1;
   const totalItems = data?.total || 0;
+
+    console.log(products)
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -91,16 +97,79 @@ export function ActiveProductsList() {
     },
   });
 
+  // Skeleton component for loading state
+  const SkeletonLoader = () => (
+    <div>
+      {/* Table Skeleton */}
+      <Table>
+        <TableHeader>
+          <TableRow className="text-base text-[#272727] font-normal">
+            <TableHead>
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+            </TableHead>
+            <TableHead>
+              <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+            </TableHead>
+            <TableHead>
+              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+            </TableHead>
+            <TableHead>
+              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+            </TableHead>
+            <TableHead>
+              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+            </TableHead>
+            <TableHead>
+              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[...Array(5)].map((_, index) => (
+            <TableRow className="text-[18px] text-[#323232] font-medium" key={index}>
+              <TableCell>
+                <div className="flex gap-3 items-center">
+                  <div className="h-[60px] w-[100px] bg-gray-200 rounded-md animate-pulse"></div>
+                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </TableCell>
+              <TableCell>
+                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+              </TableCell>
+              <TableCell>
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </TableCell>
+              <TableCell>
+                <div className="h-4 w-36 bg-gray-200 rounded animate-pulse"></div>
+              </TableCell>
+              <TableCell>
+                <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {/* Pagination Skeleton */}
+      <div className="flex justify-between items-center mt-4 px-4 py-2">
+        <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
+        <div className="flex gap-2">
+          {[...Array(3)].map((_, index) => (
+            <div
+              key={index}
+              className="h-8 w-8 bg-gray-200 rounded animate-pulse"
+            ></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <SkeletonLoader />;
   }
 
   return (
@@ -108,7 +177,7 @@ export function ActiveProductsList() {
       <div>
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="text-base text-[#272727] font-normal">
               <TableHead>Product Name</TableHead>
               <TableHead>ID</TableHead>
               <TableHead>Price</TableHead>
@@ -119,7 +188,7 @@ export function ActiveProductsList() {
           </TableHeader>
           <TableBody>
             {products.map((product) => (
-              <TableRow key={product._id}>
+              <TableRow className="text-[18px] text-[#323232] font-medium" key={product._id}>
                 <TableCell>
                   <div className="flex gap-3">
                     <Image
@@ -132,7 +201,7 @@ export function ActiveProductsList() {
                     {product.title}
                   </div>
                 </TableCell>
-                <TableCell>{product._id}</TableCell>
+                <TableCell>{product.code}</TableCell>
                 <TableCell>${product.price.toFixed(2)}</TableCell>
                 <TableCell>{product.quantity}</TableCell>
                 <TableCell>
@@ -154,7 +223,7 @@ export function ActiveProductsList() {
         </Table>
 
         {/* Pagination */}
-        {totalPages > 10 && (
+        {totalPages > 1 && (
           <div className="flex justify-between items-center mt-4 px-4 py-2">
             <div className="text-sm text-muted-foreground">
               Showing {products.length} of {totalItems} products

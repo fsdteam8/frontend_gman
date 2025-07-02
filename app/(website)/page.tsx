@@ -129,8 +129,7 @@ const Page = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <Featured_Farms />
       </Suspense>
-      {/* <Add_Banner/> */}
-      {/* <All_farms/> */}
+     
     </div>
   );
 };

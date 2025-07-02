@@ -106,7 +106,7 @@ export function DashboardSidebar() {
               <SidebarMenuButton
                 onClick={() => router.push(item.href)}
                 isActive={isActive(item.href)}
-                className="text-white text-[18px] my-4 cursor-pointer font-normal h-[50px] hover:bg-[#038C05] hover:text-white data-[active=true]:bg-[#038C05] !duration-300"
+                className="text-white text-[18px] cursor-pointer font-normal h-[50px] hover:bg-[#038C05] hover:text-white data-[active=true]:bg-[#038C05] !duration-300"
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>

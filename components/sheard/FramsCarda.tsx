@@ -1,26 +1,25 @@
-"use client";
-import type React from "react";
-import { MapPin, MessageCircle, Star } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "../ui/button";
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+"use client"
+
+import type React from "react"
+import { MapPin, MessageCircle, Star } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { Button } from "../ui/button"
+import { useState } from "react"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface FarmsCardProps {
-  id: string;
-  name: string;
-  location:
-    | string
-    | { street?: string; city?: string; state?: string; zipCode?: string };
-  image: string;
-  profileImage: string;
-  description: string;
-  rating: number;
-  street?: string;
-  state?: string;
+  id: string
+  name: string
+  location: string | { street?: string; city?: string; state?: string; zipCode?: string }
+  image: string
+  profileImage: string
+  description: string
+  rating: number
+  street?: string
+  state?: string
 }
 
 const FarmsCard: React.FC<FarmsCardProps> = ({
@@ -34,59 +33,64 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
   street,
   state,
 }) => {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
+  console.log(profileImage, "profileImage")
 
-  const [loading, setLoading] = useState(false);
-  const token = session?.accessToken;
-  const router = useRouter();
+  const [loading, setLoading] = useState(false)
+  const [imageError, setImageError] = useState(false)
+  const token = session?.accessToken
+  const router = useRouter()
 
   const handleStartChat = async () => {
     if (!token) {
-      toast.error("Please login to start a chat");
-      return;
+      toast.error("Please login to start a chat")
+      return
     }
 
-    setLoading(true);
-
+    setLoading(true)
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/chat/create-chat`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            farmId: id,
-          }),
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/create-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          farmId: id,
+        }),
+      })
 
-      const data = await response.json();
-
+      const data = await response.json()
       if (data.success) {
+
         // Redirect to the chat page with the chat ID
         router.push(`/messages/`);
         toast.success("Chat is opening...");
+
       } else {
-        throw new Error(data.message || "Failed to create chat");
+        throw new Error(data.message || "Failed to create chat")
       }
     } catch (error) {
-      console.error("Error creating chat:", error);
-      toast("Failed to start chat. Please try again.");
+      console.error("Error creating chat:", error)
+      toast("Failed to start chat. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Format location based on whether it's a string or an object
   const formattedLocation =
     typeof location === "string"
       ? location
-      : `${location.city || ""}, ${location.state || ""}`
-          .trim()
-          .replace(/^,\s*/, "");
+      : `${location.city || ""}, ${location.state || ""}`.trim().replace(/^,\s*/, "")
+
+  // Get first letter of name for avatar
+  const getInitial = (name: string) => {
+    return name ? name.charAt(0).toUpperCase() : "?"
+  }
+
+  // Check if we should show the avatar instead of profile image
+  const shouldShowAvatar = !profileImage || profileImage.trim() === "" || imageError
 
   return (
     <div className="w-full">
@@ -98,9 +102,10 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
           className="bg-white w-[50px] h-[50px] rounded-full absolute top-4 right-4 flex items-center justify-center shadow-lg cursor-pointer hover:bg-gray-50 transition-colors"
         >
           <div>
-            <MessageCircle className="w-5 h-5 text-gray-600" />
+            <MessageCircle className="!w-8 !h-8 text-[#595959]" />
           </div>
         </Button>
+
         <Image
           src={image || "/placeholder.svg?height=260&width=320"}
           width={320}
@@ -116,13 +121,22 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
         <div className="space-y-1 sm:space-y-1.5 md:space-y-2 lg:space-y-1">
           <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 lg:gap-2">
             <div className="rounded-full overflow-hidden w-[40px] h-[40px] sm:w-[45px] sm:h-[45px] md:w-[55px] md:h-[55px] lg:w-[50px] lg:h-[50px] flex-shrink-0">
-              <Image
-                width={50}
-                height={50}
-                src={profileImage}
-                alt={`${name} profile`}
-                className="w-full h-full object-cover"
-              />
+              {shouldShowAvatar ? (
+                <div className="w-full h-full bg-gradient-to-br from-[#039B06] to-[#027A04] flex items-center justify-center">
+                  <span className="text-white font-semibold text-lg sm:text-xl md:text-2xl lg:text-xl">
+                    {getInitial(name)}
+                  </span>
+                </div>
+              ) : (
+                <Image
+                  width={50}
+                  height={50}
+                  src={profileImage || "/placeholder.svg"}
+                  alt={`${name} profile`}
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-base sm:text-lg md:text-xl lg:text-[18px] font-semibold text-[#272727] truncate">
@@ -161,7 +175,7 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FarmsCard;
+export default FarmsCard
