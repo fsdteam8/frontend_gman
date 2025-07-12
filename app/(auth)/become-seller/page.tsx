@@ -7,7 +7,7 @@ export default function BecomeSellerPage() {
     <div className="min-h-screen bg-white">
       <div className="container mx-auto py-12 px-4">
         <h1 className="text-3xl font-bold mb-8">Who should sign up to sell</h1>
-        
+
         {/* Gardeners & Bakers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {/* Gardeners */}
@@ -37,8 +37,8 @@ export default function BecomeSellerPage() {
             <div className="order-2 md:order-1 mb-4">
               <p className="text-gray-700">
                 Bakers, whether you&apos;re a small bakery or baking artisan
-                baked goods from your kitchen, you&apos;re encouraged to sign up 
-                and increase your sales. Sell your fresh bread, pastries, and 
+                baked goods from your kitchen, you&apos;re encouraged to sign up
+                and increase your sales. Sell your fresh bread, pastries, and
                 other baked goods to local customers.
               </p>
             </div>
@@ -81,8 +81,8 @@ export default function BecomeSellerPage() {
           <div className="flex flex-col">
             <div className="order-2 md:order-1 mb-4">
               <p className="text-gray-700">
-                Orchards growing apples, oranges, lemons, limes, pears, or any 
-                other fruit can connect with customers. Sell your fresh produce 
+                Orchards growing apples, oranges, lemons, limes, pears, or any
+                other fruit can connect with customers. Sell your fresh produce
                 locally or ship nationwide to reach more customers.
               </p>
             </div>
@@ -112,8 +112,8 @@ export default function BecomeSellerPage() {
             </div>
             <div className="w-full md:w-1/2">
               <p className="text-gray-700">
-                Restaurants and caterers serving locally sourced products can 
-                showcase their offerings. Connect with customers who value 
+                Restaurants and caterers serving locally sourced products can
+                showcase their offerings. Connect with customers who value
                 fresh, local ingredients and build your customer base.
               </p>
             </div>
@@ -157,7 +157,8 @@ export default function BecomeSellerPage() {
               className="rounded-lg w-full h-[250px] object-cover mb-4"
             />
             <p className="text-gray-700 text-center">
-              Dairy products including cheese, yogurt, kefir, and homemade butter
+              Dairy products including cheese, yogurt, kefir, and homemade
+              butter
             </p>
           </div>
 
@@ -178,7 +179,7 @@ export default function BecomeSellerPage() {
         <div className="mt-12 flex justify-center">
           <Link href="/seller">
             <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg cursor-pointer">
-              Agree & Continue
+              Continue
             </Button>
           </Link>
         </div>
