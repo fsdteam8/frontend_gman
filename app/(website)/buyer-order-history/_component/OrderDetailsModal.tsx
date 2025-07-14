@@ -42,7 +42,7 @@ interface OrderDetailsModalProps {
 export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalProps) {
   if (!order) return null
 
-  const subtotal = order.products.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const subtotal = order.products.reduce((sum, item) => sum + item?.product?.price * item.quantity, 0)
   const shipping = 15.0
   const tax = subtotal * 0.08 // 8% tax
  
@@ -142,10 +142,10 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
               <div key={item._id} className="flex gap-4">
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
                   <Image
-                    src={item.product.thumbnail?.url || "/placeholder.svg?height=80&width=80"}
+                    src={item?.product?.thumbnail?.url || "/placeholder.svg?height=80&width=80"}
                     width={100}
                     height={100}
-                    alt={item.product.title || "product"}
+                    alt={item?.product?.title || "product"}
                     className="object-cover rounded-lg w-full h-full"
                   />
                 </div>
