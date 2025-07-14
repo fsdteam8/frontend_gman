@@ -1,11 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export default function BecomeSellerPage() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto py-12 px-4">
+      <div className="container mx-auto py-12 px-4 ">
+        {/* <div className="absolute top-10 right-4">
+          <Link href="/">
+            <ArrowLeft />
+          </Link>
+        </div> */}
         <h1 className="text-3xl font-bold mb-8">Who should sign up to sell</h1>
 
         {/* Gardeners & Bakers */}

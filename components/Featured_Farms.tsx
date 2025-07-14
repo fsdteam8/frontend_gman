@@ -444,7 +444,7 @@ const Featured_Farms = () => {
                     size="sm"
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 border border-green-600"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -458,7 +458,7 @@ const Featured_Farms = () => {
                           size="sm"
                           onClick={() => setCurrentPage(page as number)}
                           className={`h-8 w-8 p-0 ${
-                            currentPage === page ? "bg-green-600 hover:bg-green-700 text-white" : "hover:bg-gray-100"
+                            currentPage === page ? "bg-green-600 hover:bg-green-700 text-white" : "hover:bg-gray-100 border border-green-600"
                           }`}
                         >
                           {page}
@@ -471,7 +471,7 @@ const Featured_Farms = () => {
                     size="sm"
                     onClick={() => setCurrentPage(Math.min(pagination.totalPage, currentPage + 1))}
                     disabled={currentPage === pagination.totalPage}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 border border-green-600"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

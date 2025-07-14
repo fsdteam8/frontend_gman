@@ -1,30 +1,28 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { signIn } from "next-auth/react"
-import { toast } from "sonner"
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react"
-import Image from "next/image"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
+import { Eye, EyeOff, Loader2, Mail, Lock, ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await signIn("credentials", {
@@ -32,24 +30,24 @@ export default function LoginPage() {
         password: password,
         redirect: false,
         callbackUrl: "/",
-      })
+      });
 
       if (response?.error) {
-        toast.error(response?.error)
+        toast.error(response?.error);
       } else {
-        toast.success("Login successful")
-        window.location.href = "/dashboard"
+        toast.success("Login successful");
+        window.location.href = "/dashboard";
       }
     } catch (error) {
-      toast.error("Something went wrong. Please try again. || " + error)
+      toast.error("Something went wrong. Please try again. || " + error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -77,20 +75,31 @@ export default function LoginPage() {
               <div className="flex flex-col">
                 <div className="">
                   <p className="text-[16px] font-semibold text-black">TABLE</p>
-                  <p className="text-[16px] font-normal text-[#039B06]">FRESH</p>
+                  <p className="text-[16px] font-normal text-[#039B06]">
+                    FRESH
+                  </p>
                 </div>
-                <span className="text-[6px] font-medium leading-[120%] text-[#8F8F8F]">Fresh & Healthy</span>
+                <span className="text-[6px] font-medium leading-[120%] text-[#8F8F8F]">
+                  Fresh & Healthy
+                </span>
               </div>
             </div>
           </div>
 
           <h1 className="text-4xl font-bold mb-4">Welcome to Our Site Name</h1>
-          <p className="text-lg opacity-90 text-center">Discover fresh, local produce from farms around the world</p>
+          <p className="text-lg opacity-90 text-center">
+            Discover fresh, local produce from farms around the world
+          </p>
         </div>
       </div>
 
       {/* Right side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50 relative">
+        <div className="absolute top-4 left-4">
+          <Link href="/">
+            <ArrowLeft />
+          </Link>
+        </div>
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
@@ -138,10 +147,16 @@ export default function LoginPage() {
                     type="button"
                     onClick={togglePasswordVisibility}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     disabled={isLoading}
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -151,13 +166,18 @@ export default function LoginPage() {
                   <Checkbox
                     id="remember"
                     checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    onCheckedChange={(checked) =>
+                      setRememberMe(checked as boolean)
+                    }
                   />
                   <Label htmlFor="remember" className="text-sm text-gray-600">
                     Remember me
                   </Label>
                 </div>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500 transition-colors">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+                >
                   Forgot password?
                 </Link>
               </div>
@@ -180,7 +200,10 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm">
               <span className="text-gray-600">New To our Platform? </span>
-              <Link href="/sign-up" className="text-green-600 hover:text-green-500 font-medium transition-colors">
+              <Link
+                href="/sign-up"
+                className="text-green-600 hover:text-green-500 font-medium transition-colors"
+              >
                 Sign Up Here
               </Link>
             </div>
@@ -188,5 +211,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
