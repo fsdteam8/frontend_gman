@@ -1,5 +1,3 @@
-
-
 "use client";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -46,25 +43,23 @@ interface SearchbarProps {
 }
 
 export default function Searchbar({ searchParams }: SearchbarProps) {
-  const session = useSession();
-  const token = session?.data?.accessToken;
   const router = useRouter();
 
-  const [searchQuery, setSearchQuery] = useState<string>(searchParams?.search || "");
-  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams?.category || "all");
+  const [searchQuery, setSearchQuery] = useState<string>(
+    searchParams?.search || ""
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams?.category || "all"
+  );
 
   const fetchCategories = async (): Promise<Category[]> => {
-    if (!token) {
-      return [];
-    }
-
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/admin/categories`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          // No Authorization header
         },
       }
     );
@@ -76,8 +71,6 @@ export default function Searchbar({ searchParams }: SearchbarProps) {
     const data: ApiResponse = await response.json();
     return data.data.categories;
   };
-
-
 
   const { data: categories = [], isLoading } = useQuery<Category[], Error>({
     queryKey: ["categories"],
@@ -96,7 +89,9 @@ export default function Searchbar({ searchParams }: SearchbarProps) {
     }
 
     const queryString = params.toString();
-    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+    const newUrl = queryString
+      ? `${window.location.pathname}?${queryString}`
+      : window.location.pathname;
     router.push(newUrl, { scroll: false });
   };
 
@@ -107,7 +102,9 @@ export default function Searchbar({ searchParams }: SearchbarProps) {
       params.set("category", selectedCategory);
     }
     const queryString = params.toString();
-    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+    const newUrl = queryString
+      ? `${window.location.pathname}?${queryString}`
+      : window.location.pathname;
     router.push(newUrl, { scroll: false });
   };
 
@@ -166,7 +163,9 @@ export default function Searchbar({ searchParams }: SearchbarProps) {
                     params.set("category", value); // Using _id here
                   }
                   const queryString = params.toString();
-                  const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+                  const newUrl = queryString
+                    ? `${window.location.pathname}?${queryString}`
+                    : window.location.pathname;
                   router.push(newUrl, { scroll: false });
                 }}
               >
