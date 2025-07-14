@@ -124,7 +124,7 @@ export default function OrderHistory() {
           <tbody className="divide-y bg-[#FFFFFF]">
             {currentOrders.map((order) => {
               const totalItems = order.products.reduce((sum, item) => sum + item.quantity, 0)
-              const productNames = order.products.map((item) => item.product.title).join(", ")
+              const productNames = order.products.map((item) => item?.product?.title).join(", ")
 
               return (
                 <tr key={order._id} className="hover:bg-muted/30">
@@ -139,7 +139,7 @@ export default function OrderHistory() {
                     </div>
                   </td>
                   <td className="px-4 py-4">{totalItems} Items</td>
-                  <td className="px-4 py-4">${order.totalPrice}</td>
+                  <td className="px-4 py-4">${order?.totalPrice}</td>
                   <td className="px-4 py-4">{format(new Date(order.date), "MM/dd/yyyy")}</td>
                   <td className="px-4 py-4">
                     <OrderStatusBadge status={order.status} />

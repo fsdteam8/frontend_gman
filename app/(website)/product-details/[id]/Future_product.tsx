@@ -56,7 +56,7 @@ const fetchProducts = async (farmId: string): Promise<Product[]> => {
   return data.data.product.map((product) => ({
     id: product._id,
     name: product.title,
-    image: product.thumbnail.url,
+    image: product?.thumbnail?.url,
     distance: `${data.data.farm.location.city}, ${data.data.farm.location.state} ${data.data.farm.location.zipCode}`,
     availability: data.data.farm.isOrganic ? "Organic Certified" : "Conventional",
     price: product.price,
@@ -98,7 +98,7 @@ export default function FutureProduct({farmId}: farmid) {
               <div className="relative">
                 <div className="aspect-square overflow-hidden rounded-lg">
                   <Image
-                    src={product.image}
+                    src={product.image || "/placeholder.svg"}
                     alt={product.name}
                     width={200}
                     height={200}

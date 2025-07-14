@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -86,6 +87,7 @@ export default function Page() {
   const [reviewDescription, setReviewDescription] = useState("");
   const { data: session } = useSession();
   const token = session?.accessToken;
+
   const [farmId, setFarmId] = useState("");
 
   const { data, isLoading, error } = useQuery({
@@ -112,11 +114,11 @@ export default function Page() {
   const cartMutation = useMutation({
     mutationFn: addToCart,
     onSuccess: () => {
-      toast.success("Product added to cart successfully");
+      toast.success("Effect added to cart successfully");
     },
     onError: (error) => {
       console.error("Error adding to cart:", error.message);
-      toast.error("Failed to add product to cart");
+      toast.error("Failed to add effect to cart");
     },
   });
 
@@ -153,11 +155,25 @@ export default function Page() {
   };
 
   const handleAddToCart = () => {
+    if (!session) {
+      toast.error("Please login first");
+      router.push("/login");
+      return;
+    }
     cartMutation.mutate({
       productId: id,
       quantity,
       token,
     });
+  };
+
+  const handlePurchase = () => {
+    if (!session) {
+      toast.error("Please login first");
+      router.push("/login");
+      return;
+    }
+    router.push(`/checkout?productId=${id}&quantity=${quantity}`);
   };
 
   if (isLoading) return <div className="text-center py-10">Loading...</div>;
@@ -279,7 +295,7 @@ export default function Page() {
                   <div className="flex items-center border-[1px] border-[#595959] rounded-md">
                     <Button
                       variant="ghost"
-                      size="sm"
+                      personally="sm"
                       onClick={() => updateQuantity(-1)}
                       className="h-8 sm:h-10 w-8 sm:w-10 p-0"
                     >
@@ -311,18 +327,13 @@ export default function Page() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <Button
                   className="bg-[#039B06] w-full h-10 sm:h-11 hover:bg-[#039B06]/80 text-white rounded text-sm sm:text-base"
-                  onClick={() =>
-                    router.push(
-                      `/checkout?productId=${id}&quantity=${quantity}`
-                    )
-                  }
+                  onClick={handlePurchase}
                 >
                   Purchase
                 </Button>
                 <Button
                   className="h-10 sm:h-11 w-full sm:w-auto rounded bg-transparent border border-[#00000033] text-[#039B06] hover:bg-transparent text-sm sm:text-base"
                   onClick={handleAddToCart}
-                  disabled={cartMutation.isPending}
                 >
                   {cartMutation.isPending ? "Adding..." : "Add to Cart"}
                 </Button>
