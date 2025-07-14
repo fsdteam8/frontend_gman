@@ -159,7 +159,7 @@ export default function RegisterContent() {
       </div>
 
       {/* Right side - Registration Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-start justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">
@@ -180,7 +180,7 @@ export default function RegisterContent() {
                   setUserType(value)
                 }
                 className="flex gap-6"
-              >
+              > 
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="seller" id="seller" />
                   <Label htmlFor="seller">Join as a Seller</Label>
