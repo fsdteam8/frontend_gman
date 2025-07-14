@@ -10,7 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Eye, EyeOff, User, Mail, Phone, MapPin, Lock } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Lock,
+  ArrowBigLeft,
+  ArrowLeft,
+} from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -159,12 +169,19 @@ export default function RegisterContent() {
       </div>
 
       {/* Right side - Registration Form */}
-      <div className="w-full lg:w-1/2 flex items-start justify-center p-8">
+      <div className=" w-full lg:w-1/2 flex items-start justify-center p-8 relative">
+        <div className="absolute top-4 left-4">
+          <Link href="/">
+            <ArrowLeft />
+          </Link>
+        </div>
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Create Your Account
-            </h2>
+            <div className="">
+              <h2 className="text-3xl font-bold text-gray-900 ">
+                Create Your Account
+              </h2>
+            </div>
             <p className="mt-2 text-gray-600">
               Join us and start {userType === "buyer" ? "shopping" : "selling"}{" "}
               today
@@ -180,7 +197,7 @@ export default function RegisterContent() {
                   setUserType(value)
                 }
                 className="flex gap-6"
-              > 
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="seller" id="seller" />
                   <Label htmlFor="seller">Join as a Seller</Label>
@@ -191,7 +208,7 @@ export default function RegisterContent() {
                 </div>
               </RadioGroup>
 
-              {userType === "seller" && (
+              {/* {userType === "seller" && (
                 <div className="mt-2">
                   <Link
                     href="/become-seller/info"
@@ -200,7 +217,7 @@ export default function RegisterContent() {
                     Who should sign up to sell?
                   </Link>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Name */}
