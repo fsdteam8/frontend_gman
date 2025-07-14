@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import PacificPagination from "@/components/ui/PacificPagination";
+import { useQuery } from "@tanstack/react-query";
 
 // Types
 interface BlogThumbnail {
@@ -46,42 +47,24 @@ export default function BlogWithPagination() {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 5;
 
-  const [data, setData] = useState<BlogsResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
 
-      try {
-        const res = await fetch(
-          `https://gman54-backend.onrender.com/api/v1/admin/blogs?page=${currentPage}&limit=${limit}`,
-          {
-            signal: controller.signal,
-          }
-        );
 
-        if (!res.ok) throw new Error("Failed to fetch blogs");
-
-        const json: BlogsResponse = await res.json();
-        setData(json);
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name !== "AbortError") {
-          setError(err.message || "Something went wrong");
-        } else if (!(err instanceof Error)) {
-          setError("Something went wrong");
-        }
-      } finally {
-        setIsLoading(false);
+  const { data, isLoading, error } = useQuery<BlogsResponse>({
+    queryKey: ["blogs", currentPage],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/blogs?page=${currentPage}&limit=${limit}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch blogs");
       }
-    };
+      return response.json();
+    },
+  })
 
-    fetchData();
-    return () => controller.abort();
-  }, [currentPage]);
+
 
   const blogs = data?.data.blogs || [];
   const pagination = data?.data.pagination || {
@@ -112,7 +95,7 @@ export default function BlogWithPagination() {
           ))}
         </div>
       ) : error ? (
-        <div className="text-red-500 text-center">{error}</div>
+        <div className="text-red-500 text-center">{error && <div>{error.message}</div>}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
