@@ -1,6 +1,6 @@
 export default function HeroSection() {
   return (
-    <section className="relative h-[300px] md:h-[659px] overflow-hidden">
+    <section className="relative h-[300px] lg:h-[560px] 2xl:h-[659px]  overflow-hidden">
       {/* Background Image with Linear Gradient Overlay */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -12,6 +12,8 @@ export default function HeroSection() {
             ),
             url('/asset/home.png')
           `,
+          backgroundSize: "cover",
+          backgroundPosition: "top center",
         }}
       />
 

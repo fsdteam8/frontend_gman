@@ -1,10 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/sheard/Navbar";
+import { Footer } from "@/components/sheard/Footer";
 
 export default function BecomeSellerPage() {
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       <div className="container mx-auto py-12 px-4 ">
         {/* <div className="absolute top-10 right-4">
           <Link href="/">
@@ -189,6 +192,7 @@ export default function BecomeSellerPage() {
           </Link>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

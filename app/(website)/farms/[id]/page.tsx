@@ -262,7 +262,7 @@ export default function FarmPage() {
                 <div className="flex items-center gap-1 text-gray-600">
                   <MapPin className="w-4 h-4 text-[#039B06] flex-shrink-0" />
                   <span className="text-sm sm:text-base">
-                    {farm.location.street}, {farm.location.city}, {farm.location.state}
+                   {farm.location.city}, {farm.location.state}
                   </span>
                 </div>
               </div>

@@ -712,7 +712,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b bg-background">
-        <div className="container mx-auto flex h-[90px] items-center justify-between px-2 lg:px-0">
+        <div className="container mx-auto flex h-[90px] items-center justify-between px-2 lg:px-2">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/asset/logo.png"
@@ -810,7 +810,7 @@ export function Navbar() {
                     variant="default"
                     className="bg-[#014A14] hover:bg-[#039B06] text-white cursor-pointer"
                   >
-                    Sign Up
+                    Sign Up / Sign In
                   </Button>
                 </Link>
               )}

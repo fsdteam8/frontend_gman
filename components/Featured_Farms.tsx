@@ -360,7 +360,7 @@ const Featured_Farms = () => {
   const pagination = farmsData?.data.pagination // Pagination only applies to farms
 
   return (
-    <section className="container mx-auto px-4 md:px-0 py-12 mt-[40px] md:mt-[100px]">
+    <section className="container mx-auto px-4 md:px-2 py-12 mt-[40px] md:mt-[100px]">
       <div>
         <h2 className="text-3xl text-[#272727] font-semibold mb-8">
           {isCategoryView ? "Products by Category" : "Featured Farms"}
