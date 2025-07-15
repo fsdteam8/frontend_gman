@@ -829,11 +829,11 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-[#039B06] hover:bg-[#039B06]/10"
+                className="h-[35px] w-auto px-2 text-white bg-[#039B06] hover:bg-[#028a05] hover:text-white cursor-pointer whitespace-nowrap"
                 onClick={handleDonateClick}
                 aria-label="Donate"
               >
-                <Heart className="!h-7 !w-7" />
+                Donate
               </Button>
               <Button
                 variant="ghost"
