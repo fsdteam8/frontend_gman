@@ -39,7 +39,7 @@ const Layout = ({ children }: LayoutProps) => {
     <div>
       <Navbar />
       {children} 
-      <Testimonial />
+      {/* <Testimonial /> */}
       <Footer />
       <AutoModalWrapper />
     </div>

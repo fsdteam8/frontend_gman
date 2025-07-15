@@ -466,7 +466,7 @@ export default function RegisterContent() {
                 : "Sign Up"}
             </Button>
 
-            <div className="text-center text-sm">
+            <div className="text-center text-lg">
               <span className="text-gray-600">Already You Have Account? </span>
               <Link
                 href="/login"

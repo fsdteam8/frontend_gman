@@ -12,6 +12,8 @@ import { ArrowLeft, ImagePlus, MapPin } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic"; // Import dynamic
 import Link from "next/link";
+import { Navbar } from "@/components/sheard/Navbar";
+import { Footer } from "@/components/sheard/Footer";
 
 // Dynamically import MapModal with ssr: false
 const MapModal = dynamic(() => import("./_component/MapModal"), { ssr: false });
@@ -175,138 +177,147 @@ export default function SellerPage() {
   }
 
   return (
-    <div className="bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Set Up Your Seller Profile</h1>
-            <div className="">
-              <Link href="/become-seller">
-                <ArrowLeft />
-              </Link>
-            </div>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="space-y-2">
-              <Label htmlFor="farmName">Set Farm Name</Label>
-              <Input
-                id="farmName"
-                placeholder="Set name"
-                value={formData.farmName}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, farmName: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Upload Your Farm Pictures</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 h-40 flex flex-col items-center justify-center relative"
-                  >
-                    {index < imageUrls.length ? (
-                      <>
-                        <Image
-                          src={imageUrls[index] || "/placeholder.svg"}
-                          width={1000}
-                          height={1000}
-                          alt={`Farm image ${index + 1}`}
-                          className="h-full w-full object-cover rounded-md"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                        >
-                          ×
-                        </button>
-                      </>
-                    ) : (
-                      <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
-                        <ImagePlus className="h-8 w-8 text-gray-400 mb-2" />
-                        <span className="text-sm text-gray-500">Add Image</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageChange}
-                        />
-                      </label>
-                    )}
-                  </div>
-                ))}
+    <div>
+      <Navbar/>
+      <div className="bg-gray-50 py-12">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-bold">Set Up Your Seller Profile</h1>
+              <div className="">
+                <Link href="/become-seller">
+                  <ArrowLeft />
+                </Link>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Describe Your Farm</Label>
-              <Textarea
-                id="description"
-                placeholder="Tell us about your farm, what you grow, your farming practices, etc."
-                className="min-h-[120px]"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="organic"
-                checked={formData.isOrganic}
-                onCheckedChange={(checked) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isOrganic: checked as boolean,
-                  }))
-                }
-              />
-              <Label htmlFor="organic" className="text-sm font-medium">
-                Select only if you produce organic products
-              </Label>
-            </div>
-            <div className="space-y-2">
-              <Label>Farm Location</Label>
-              {placeName && (
-                <p className="text-sm text-gray-600 mt-2">{placeName}</p>
-              )}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-2">
+                <Label htmlFor="farmName">Set Farm Name</Label>
+                <Input
+                  id="farmName"
+                  placeholder="Set name"
+                  value={formData.farmName}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      farmName: e.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Upload Your Farm Pictures</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 h-40 flex flex-col items-center justify-center relative"
+                    >
+                      {index < imageUrls.length ? (
+                        <>
+                          <Image
+                            src={imageUrls[index] || "/placeholder.svg"}
+                            width={1000}
+                            height={1000}
+                            alt={`Farm image ${index + 1}`}
+                            className="h-full w-full object-cover rounded-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                          >
+                            ×
+                          </button>
+                        </>
+                      ) : (
+                        <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                          <ImagePlus className="h-8 w-8 text-gray-400 mb-2" />
+                          <span className="text-sm text-gray-500">
+                            Add Image
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageChange}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Describe Your Farm</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Tell us about your farm, what you grow, your farming practices, etc."
+                  className="min-h-[120px]"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="organic"
+                  checked={formData.isOrganic}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isOrganic: checked as boolean,
+                    }))
+                  }
+                />
+                <Label htmlFor="organic" className="text-sm font-medium">
+                  Select only if you produce organic products
+                </Label>
+              </div>
+              <div className="space-y-2">
+                <Label>Farm Location</Label>
+                {placeName && (
+                  <p className="text-sm text-gray-600 mt-2">{placeName}</p>
+                )}
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    className="w-[146px] h-[44px] bg-[#039B06] text-white hover:bg-[#039B06]"
+                    onClick={() => setIsMapOpen(true)}
+                  >
+                    <MapPin />
+                    Map
+                  </Button>
+                </div>
+              </div>
               <div className="flex justify-center">
                 <Button
-                  type="button"
-                  className="w-[146px] h-[44px] bg-[#039B06] text-white hover:bg-[#039B06]"
-                  onClick={() => setIsMapOpen(true)}
+                  type="submit"
+                  className="w-[146px] h-[44px] bg-[#039B06] hover:bg-[#039B06]"
+                  disabled={isLoading}
                 >
-                  <MapPin />
-                  Map
+                  {isLoading ? "Setting up..." : "Continue"}
                 </Button>
               </div>
-            </div>
-            <div className="flex justify-center">
-              <Button
-                type="submit"
-                className="w-[146px] h-[44px] bg-[#039B06] hover:bg-[#039B06]"
-                disabled={isLoading}
-              >
-                {isLoading ? "Setting up..." : "Continue"}
-              </Button>
-            </div>
-          </form>
+            </form>
+          </div>
+          {isMapOpen && (
+            <MapModal
+              isOpen={isMapOpen}
+              onClose={() => setIsMapOpen(false)}
+              onLocationSelect={handleLocationSelect}
+              initialLat={latitude || 34.0522}
+              initialLng={longitude || -118.2437}
+            />
+          )}
         </div>
-        {isMapOpen && (
-          <MapModal
-            isOpen={isMapOpen}
-            onClose={() => setIsMapOpen(false)}
-            onLocationSelect={handleLocationSelect}
-            initialLat={latitude || 34.0522}
-            initialLng={longitude || -118.2437}
-          />
-        )}
       </div>
+      <Footer />
     </div>
   );
 }
