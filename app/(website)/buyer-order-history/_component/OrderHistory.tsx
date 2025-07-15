@@ -200,67 +200,70 @@ export default function OrderHistory() {
       />
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 text-sm">
-          <div className="text-muted-foreground">
-            Showing {indexOfFirstOrder + 1} to{" "}
-            {Math.min(indexOfLastOrder, totalOrders)} of {totalOrders} results
-          </div>
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => paginate(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="border-green-600 bg-white text-black"
-            >
-              <ChevronLeft />
-            </Button>
+   {totalPages > 1 && (
+  <div className="flex items-center justify-between mt-4 text-sm">
+    <div className="text-muted-foreground">
+      Showing {indexOfFirstOrder + 1} to{" "}
+      {Math.min(indexOfLastOrder, totalOrders)} of {totalOrders} results
+    </div>
+    <div className="flex items-center space-x-1">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => paginate(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
+        className="border border-green-600 bg-white text-black hover:bg-white"
+      >
+        <ChevronLeft />
+      </Button>
 
-            {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) => {
-              const pageNumber = index + 1;
-              const isActive = currentPage === pageNumber;
+      {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) => {
+        const pageNumber = index + 1;
+        const isActive = currentPage === pageNumber;
 
-              return (
-                <Button
-                  key={pageNumber}
-                  size="sm"
-                  onClick={() => paginate(pageNumber)}
-                  className={`border-green-600 ${
-                    isActive ? "bg-green-600 text-white" : "bg-white text-black"
-                  }`}
-                >
-                  {pageNumber}
-                </Button>
-              );
-            })}
+        return (
+          <Button
+            key={pageNumber}
+            size="sm"
+            onClick={() => paginate(pageNumber)}
+            className={`border border-green-600 ${
+              isActive
+                ? "bg-green-600 text-white hover:bg-green-600"
+                : "bg-white text-black hover:bg-white"
+            }`}
+          >
+            {pageNumber}
+          </Button>
+        );
+      })}
 
-            {totalPages > 5 && (
-              <>
-                <span className="px-2">...</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => paginate(totalPages)}
-                  className="border-green-600 bg-white text-black"
-                >
-                  {totalPages}
-                </Button>
-              </>
-            )}
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="border-green-600 bg-white text-black"
-            >
-              <ChevronRight />
-            </Button>
-          </div>
-        </div>
+      {totalPages > 5 && (
+        <>
+          <span className="px-2">...</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => paginate(totalPages)}
+            className="border border-green-600 bg-white text-black hover:bg-white"
+          >
+            {totalPages}
+          </Button>
+        </>
       )}
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages}
+        className="border border-green-600 bg-white text-black hover:bg-white"
+      >
+        <ChevronRight />
+      </Button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
