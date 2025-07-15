@@ -712,7 +712,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b bg-background">
-        <div className="container mx-auto flex h-[90px] items-center justify-between px-2 lg:px-0">
+        <div className="container mx-auto flex h-[90px] items-center justify-between px-2 lg:px-2">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/asset/logo.png"
@@ -810,7 +810,7 @@ export function Navbar() {
                     variant="default"
                     className="bg-[#014A14] hover:bg-[#039B06] text-white cursor-pointer"
                   >
-                    Sign Up
+                    Sign Up / Sign In
                   </Button>
                 </Link>
               )}
@@ -829,11 +829,11 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-[#039B06] hover:bg-[#039B06]/10"
+                className="h-[35px] w-auto px-2 text-white bg-[#039B06] hover:bg-[#028a05] hover:text-white cursor-pointer whitespace-nowrap"
                 onClick={handleDonateClick}
                 aria-label="Donate"
               >
-                <Heart className="!h-7 !w-7" />
+                Donate
               </Button>
               <Button
                 variant="ghost"

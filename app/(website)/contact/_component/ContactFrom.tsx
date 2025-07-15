@@ -101,8 +101,8 @@ export default function ContactForm() {
                     Say something to start a live chat!
                   </p>
 
-                  <div className="space-y-6 lg:space-y-8">
-                    {/* Phone */}
+                  {/* <div className="space-y-6 lg:space-y-8">
+                   
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <Phone className="w-5 h-5 text-[#595959]" />
@@ -110,7 +110,7 @@ export default function ContactForm() {
                       <span className="text-sm sm:text-base text-[#595959]">+1 (555) 000-0000</span>
                     </div>
 
-                    {/* Email */}
+                   
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <Mail className="w-5 h-5 text-[#595959]" />
@@ -118,7 +118,7 @@ export default function ContactForm() {
                       <span className="text-sm sm:text-base text-[#595959]">info@acme123.com</span>
                     </div>
 
-                    {/* Address */}
+                  
                     <div className="flex items-start space-x-4">
                       <div className="flex-shrink-0 mt-1">
                         <MapPin className="w-5 h-5 text-[#595959]" />
@@ -129,7 +129,7 @@ export default function ContactForm() {
                         Cerritos, CA 00000-0000
                       </span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Decorative circles */}

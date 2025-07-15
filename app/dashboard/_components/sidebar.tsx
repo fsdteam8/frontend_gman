@@ -80,7 +80,7 @@ export function DashboardSidebar() {
   return (
     <Sidebar className="!bg-[#014A14] text-white p-2">
       <SidebarHeader className="p-4 !bg-[#014A14]">
-        <Link href="#" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image
             src="/asset/logo.png"
             width={40}
