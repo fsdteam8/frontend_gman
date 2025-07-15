@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -115,81 +117,87 @@ export default function OrderHistory() {
   };
 
   return (
-    <div className="w-full">
-      <h1 className="text-2xl font-semibold text-[#272727] mb-6">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
+      <h1 className="text-xl sm:text-2xl font-semibold text-[#272727] mb-4 sm:mb-6">
         Order History
       </h1>
 
       <div className="w-full overflow-x-auto rounded-lg border">
-        <table className="w-full shadow-lg">
-          <thead>
-            <tr className="bg-[#FFFFFF] ">
-              <th className="px-4 py-3 text-left font-medium text-base text-[#272727]">
-                Product Names
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-base text-[#272727]">
-                Total Items
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-base text-[#272727]">
-                Total Price
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-base text-[#272727]">
-                Date
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-base text-[#272727]">
-                Status
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-base text-[#272727]">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y bg-[#FFFFFF]">
-            {currentOrders.map((order) => {
-              const totalItems = order.products.reduce(
-                (sum, item) => sum + item.quantity,
-                0
-              );
-              const productNames = order.products
-                .map((item) => item?.product?.title)
-                .join(", ");
+        <div className="min-w-[600px] sm:min-w-0">
+          <table className="w-full shadow-lg">
+            <thead>
+              <tr className="bg-[#FFFFFF]">
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium text-sm sm:text-base text-[#272727]">
+                  Products
+                </th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium text-sm sm:text-base text-[#272727]">
+                  Items
+                </th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium text-sm sm:text-base text-[#272727]">
+                  Price
+                </th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium text-sm sm:text-base text-[#272727]">
+                  Date
+                </th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium text-sm sm:text-base text-[#272727]">
+                  Status
+                </th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium text-sm sm:text-base text-[#272727]">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y bg-[#FFFFFF]">
+              {currentOrders.map((order) => {
+                const totalItems = order.products.reduce(
+                  (sum, item) => sum + item.quantity,
+                  0
+                );
+                const productNames = order.products
+                  .map((item) => item?.product?.title)
+                  .join(", ");
 
-              return (
-                <tr key={order._id} className="hover:bg-muted/30">
-                  <td className="px-4 py-4">
-                    <div className="max-w-xs">
-                      <p className="truncate" title={productNames}>
-                        {productNames}
-                      </p>
-                      {order.products.length > 1 && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {order.products.length} different products
+                return (
+                  <tr key={order._id} className="hover:bg-muted/30">
+                    <td className="px-3 py-2 sm:px-4 sm:py-4">
+                      <div className="max-w-[150px] sm:max-w-xs">
+                        <p className="truncate" title={productNames}>
+                          {productNames}
                         </p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">{totalItems} Items</td>
-                  <td className="px-4 py-4">${order?.totalPrice}</td>
-                  <td className="px-4 py-4">
-                    {format(new Date(order.date), "MM/dd/yyyy")}
-                  </td>
-                  <td className="px-4 py-4">
-                    <OrderStatusBadge status={order.status} />
-                  </td>
-                  <td className="px-4 py-4">
-                    <Button
-                      variant="link"
-                      className="text-[#027405] text-sm font-normal p-0 h-auto"
-                      onClick={() => handleSeeDetails(order)}
-                    >
-                      See Details
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {order.products.length > 1 && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {order.products.length} products
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 sm:px-4 sm:py-4 whitespace-nowrap">
+                      {totalItems}
+                    </td>
+                    <td className="px-3 py-2 sm:px-4 sm:py-4 whitespace-nowrap">
+                      ${order?.totalPrice}
+                    </td>
+                    <td className="px-3 py-2 sm:px-4 sm:py-4 whitespace-nowrap">
+                      {format(new Date(order.date), "MM/dd/yyyy")}
+                    </td>
+                    <td className="px-3 py-2 sm:px-4 sm:py-4">
+                      <OrderStatusBadge status={order.status} />
+                    </td>
+                    <td className="px-3 py-2 sm:px-4 sm:py-4">
+                      <Button
+                        variant="link"
+                        className="text-[#027405] text-xs sm:text-sm font-normal p-0 h-auto"
+                        onClick={() => handleSeeDetails(order)}
+                      >
+                        Details
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Order Details Modal */}
@@ -200,115 +208,128 @@ export default function OrderHistory() {
       />
 
       {/* Pagination */}
-   {totalPages > 1 && (
-  <div className="flex items-center justify-between mt-4 text-sm">
-    <div className="text-muted-foreground">
-      Showing {indexOfFirstOrder + 1} to{" "}
-      {Math.min(indexOfLastOrder, totalOrders)} of {totalOrders} results
-    </div>
-    <div className="flex items-center space-x-1">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => paginate(Math.max(1, currentPage - 1))}
-        disabled={currentPage === 1}
-        className="border border-green-600 bg-white text-black hover:bg-white"
-      >
-        <ChevronLeft />
-      </Button>
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-4 text-sm">
+          <div className="text-muted-foreground text-xs sm:text-sm">
+            Showing {indexOfFirstOrder + 1} to{" "}
+            {Math.min(indexOfLastOrder, totalOrders)} of {totalOrders} results
+          </div>
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="border border-green-600 bg-white text-black hover:bg-white h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
 
-      {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) => {
-        const pageNumber = index + 1;
-        const isActive = currentPage === pageNumber;
+            {Array.from({ length: Math.min(totalPages, 3) }).map((_, index) => {
+              const pageNumber = index + 1;
+              const isActive = currentPage === pageNumber;
 
-        return (
-          <Button
-            key={pageNumber}
-            size="sm"
-            onClick={() => paginate(pageNumber)}
-            className={`border border-green-600 ${
-              isActive
-                ? "bg-green-600 text-white hover:bg-green-600"
-                : "bg-white text-black hover:bg-white"
-            }`}
-          >
-            {pageNumber}
-          </Button>
-        );
-      })}
+              return (
+                <Button
+                  key={pageNumber}
+                  size="sm"
+                  onClick={() => paginate(pageNumber)}
+                  className={`border border-green-600 h-8 w-8 p-0 ${
+                    isActive
+                      ? "bg-green-600 text-white hover:bg-green-600"
+                      : "bg-white text-black hover:bg-white"
+                  }`}
+                >
+                  {pageNumber}
+                </Button>
+              );
+            })}
 
-      {totalPages > 5 && (
-        <>
-          <span className="px-2">...</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => paginate(totalPages)}
-            className="border border-green-600 bg-white text-black hover:bg-white"
-          >
-            {totalPages}
-          </Button>
-        </>
+            {totalPages > 3 && (
+              <>
+                {currentPage > 3 && currentPage < totalPages - 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border border-green-600 bg-white text-black hover:bg-white h-8 w-8 p-0"
+                    disabled
+                  >
+                    ...
+                  </Button>
+                )}
+
+                {currentPage < totalPages - 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => paginate(totalPages)}
+                    className="border border-green-600 bg-white text-black hover:bg-white h-8 w-8 p-0"
+                  >
+                    {totalPages}
+                  </Button>
+                )}
+              </>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="border border-green-600 bg-white text-black hover:bg-white h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       )}
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages}
-        className="border border-green-600 bg-white text-black hover:bg-white"
-      >
-        <ChevronRight />
-      </Button>
-    </div>
-  </div>
-)}
-
     </div>
   );
 }
 
 function OrderHistorySkeleton() {
   return (
-    <div className="w-full">
-      <Skeleton className="h-8 w-48 mb-6" />
+    <div className="w-full px-4 sm:px-6 lg:px-8">
+      <Skeleton className="h-8 w-48 mb-4 sm:mb-6" />
       <div className="w-full overflow-x-auto rounded-lg border">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-[#FFFFFF]">
-              <th className="px-4 py-3 text-left font-medium">Product Names</th>
-              <th className="px-4 py-3 text-left font-medium">Total Items</th>
-              <th className="px-4 py-3 text-left font-medium">Total Price</th>
-              <th className="px-4 py-3 text-left font-medium">Date</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-              <th className="px-4 py-3 text-left font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y bg-white">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <tr key={index}>
-                <td className="px-4 py-4">
-                  <Skeleton className="h-4 w-32" />
-                </td>
-                <td className="px-4 py-4">
-                  <Skeleton className="h-4 w-16" />
-                </td>
-                <td className="px-4 py-4">
-                  <Skeleton className="h-4 w-16" />
-                </td>
-                <td className="px-4 py-4">
-                  <Skeleton className="h-4 w-24" />
-                </td>
-                <td className="px-4 py-4">
-                  <Skeleton className="h-6 w-20 rounded-full" />
-                </td>
-                <td className="px-4 py-4">
-                  <Skeleton className="h-4 w-20" />
-                </td>
+        <div className="min-w-[600px] sm:min-w-0">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#FFFFFF]">
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium">Products</th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium">Items</th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium">Price</th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium">Date</th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium">Status</th>
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-medium">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y bg-white">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <tr key={index}>
+                  <td className="px-3 py-2 sm:px-4 sm:py-4">
+                    <Skeleton className="h-4 w-32" />
+                  </td>
+                  <td className="px-3 py-2 sm:px-4 sm:py-4">
+                    <Skeleton className="h-4 w-8" />
+                  </td>
+                  <td className="px-3 py-2 sm:px-4 sm:py-4">
+                    <Skeleton className="h-4 w-16" />
+                  </td>
+                  <td className="px-3 py-2 sm:px-4 sm:py-4">
+                    <Skeleton className="h-4 w-20" />
+                  </td>
+                  <td className="px-3 py-2 sm:px-4 sm:py-4">
+                    <Skeleton className="h-6 w-16 sm:w-20 rounded-full" />
+                  </td>
+                  <td className="px-3 py-2 sm:px-4 sm:py-4">
+                    <Skeleton className="h-4 w-12 sm:w-20" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
