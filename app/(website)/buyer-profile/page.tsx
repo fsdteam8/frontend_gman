@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import type React from "react";
@@ -16,7 +17,6 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
-
   X,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -49,10 +49,6 @@ interface ProfileData {
   updatedAt: string;
 }
 
-// type ProfileUpdateInput = Partial<Omit<ProfileData, "avatar">> & {
-//   avatar?: File | { public_id: string; url: string };
-// };
-
 interface ApiResponse {
   success: boolean;
   message: string;
@@ -80,7 +76,7 @@ export default function BuyerProfile() {
   const queryClient = useQueryClient();
   const session = useSession();
   const token = session.data?.accessToken;
-  const router = useRouter()
+  const router = useRouter();
 
   const fetchProfile = async (): Promise<ApiResponse> => {
     const response = await fetch(
@@ -140,8 +136,7 @@ export default function BuyerProfile() {
 
   const changePassword = async (
     passwordData: PasswordChangeData
-    // eslint-disable-next-line
-  ): Promise<any> => {
+  ): Promise<ApiResponse> => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`,
       {
@@ -226,8 +221,8 @@ export default function BuyerProfile() {
         address: {
           ...prev.address,
           [addressField]: value,
-          // eslint-disable-next-line
-        } as any,
+          //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any ,
       }));
     } else {
       setFormData((prev) => ({
@@ -284,16 +279,15 @@ export default function BuyerProfile() {
     }
   };
 
-  
-    const handleLogout = async () => {
-      try {
-        await signOut({ redirect: false })
-        toast.success("Logged out successfully!")
-        router.push("/")
-      } catch (error) {
-        toast.error("Failed to log out: " + (error as Error).message)
-      }
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      toast.success("Logged out successfully!");
+      router.push("/");
+    } catch (error) {
+      toast.error("Failed to log out: " + (error as Error).message);
     }
+  };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,42 +309,42 @@ export default function BuyerProfile() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8 md:py-12">
-        <h1 className="mb-8 text-3xl font-bold">Profile</h1>
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="md:col-span-3">
+      <div className="container mx-auto py-6 sm:py-8 md:py-12 px-4 sm:px-6">
+        <h1 className="mb-6 text-2xl sm:text-3xl font-bold">Profile</h1>
+        <div className="grid gap-6 sm:gap-8 grid-cols-1">
+          <div>
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-16 w-16 rounded-full" />
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Skeleton className="h-14 w-14 sm:h-16 sm:w-16 rounded-full" />
                   <div>
-                    <Skeleton className="h-6 w-32 mb-2" />
-                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 sm:h-6 w-28 sm:w-32 mb-2" />
+                    <Skeleton className="h-3 sm:h-4 w-20 sm:w-24" />
                   </div>
                 </div>
-                <Skeleton className="h-10 w-16" />
+                <Skeleton className="h-9 sm:h-10 w-full sm:w-16" />
               </CardHeader>
             </Card>
           </div>
-          <div className="md:col-span-3">
+          <div>
             <Card>
               <CardHeader>
-                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-5 sm:h-6 w-40 sm:w-48" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Skeleton className="h-10" />
-                  <Skeleton className="h-10" />
+              <CardContent className="space-y-4 p-4 sm:p-6">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                  <Skeleton className="h-9 sm:h-10" />
+                  <Skeleton className="h-9 sm:h-10" />
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Skeleton className="h-10" />
-                  <Skeleton className="h-10" />
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                  <Skeleton className="h-9 sm:h-10" />
+                  <Skeleton className="h-9 sm:h-10" />
                 </div>
-                <Skeleton className="h-10" />
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <Skeleton className="h-10" />
-                  <Skeleton className="h-10" />
-                  <Skeleton className="h-10" />
+                <Skeleton className="h-9 sm:h-10" />
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                  <Skeleton className="h-9 sm:h-10" />
+                  <Skeleton className="h-9 sm:h-10" />
+                  <Skeleton className="h-9 sm:h-10" />
                 </div>
               </CardContent>
             </Card>
@@ -362,7 +356,7 @@ export default function BuyerProfile() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 md:py-12">
+      <div className="container mx-auto py-6 sm:py-8 md:py-12 px-4 sm:px-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -389,28 +383,31 @@ export default function BuyerProfile() {
   };
 
   return (
-    <div className="container mx-auto py-8 md:py-12">
-      <h1 className="mb-8 text-3xl font-bold">Profile</h1>
+    <div className="container mx-auto py-6 sm:py-8 md:py-12 px-4 sm:px-6">
+      <h1 className="mb-6 text-2xl sm:text-3xl font-bold">Profile</h1>
 
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-3">
+      <div className="grid gap-6 sm:gap-8 grid-cols-1">
+        <div>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 border">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 p-4 sm:p-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Avatar className="h-14 w-14 sm:h-16 sm:w-16 border">
                   <AvatarImage
                     src={
                       imagePreview ||
-                      (profile.avatar && !(profile.avatar instanceof File) ? profile.avatar.url : undefined) ||
+                      (profile.avatar && !(profile.avatar instanceof File)
+                        ? profile.avatar.url
+                        : undefined) ||
                       "/placeholder.svg?height=64&width=64"
                     }
                     alt={`@${profile.username}`}
+                    className="object-cover"
                   />
                   <AvatarFallback>{getInitials(profile.name)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <CardTitle>{profile.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  <CardTitle className="text-lg sm:text-xl">{profile.name}</CardTitle>
+                  <p className="text-xs sm:sm:text-sm text-muted-foreground">
                     @{profile.username}
                   </p>
                 </div>
@@ -418,7 +415,7 @@ export default function BuyerProfile() {
               {!showPasswordChange && (
                 <Button
                   variant="outline"
-                  className="gap-1"
+                  className="gap-1 text-sm sm:text-base w-full sm:w-auto min-h-[44px]"
                   onClick={handleEditClick}
                 >
                   <Pencil className="h-4 w-4" />
@@ -427,25 +424,26 @@ export default function BuyerProfile() {
               )}
             </CardHeader>
             {isEditing && (
-              <CardContent>
+              <CardContent className="p-4 sm:p-6">
                 <div className="grid gap-4">
-                  <Label htmlFor="avatar">Profile Image</Label>
-                  <div className="flex items-center gap-4">
+                  <Label htmlFor="avatar" className="text-sm sm:text-base">Profile Image</Label>
+                  <div className="flex items-center gap-2 sm:gap-4 flex-col sm:flex-row">
                     <Input
                       id="avatar"
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
                       ref={fileInputRef}
-                      className="w-auto"
+                      className="w-full sm:w-auto text-sm sm:text-base"
                     />
                     {imagePreview && (
                       <Button
                         variant="destructive"
                         size="icon"
                         onClick={handleRemoveImage}
+                        className="h-8 w-8"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-5 w-5" />
                       </Button>
                     )}
                   </div>
@@ -455,29 +453,41 @@ export default function BuyerProfile() {
           </Card>
         </div>
 
-        <div className="md:col-span-3">
+        <div>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>
-                {showPasswordChange
-                  ? "Change Password"
-                  : "Personal Information"}
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">
+                {showPasswordChange ? "Change Password" : "Personal Information"}
               </CardTitle>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-col sm:flex-row">
                 {showPasswordChange ? (
-                  <Button variant="outline" onClick={togglePasswordChange}>
+                  <Button
+                    variant="outline"
+                    onClick={togglePasswordChange}
+                    className="w-full sm:w-auto min-h-[44px]"
+                  >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Profile
                   </Button>
                 ) : (
                   <>
-                    <Button variant="outline" onClick={togglePasswordChange}>
-                      Change Password
-                    </Button>
-                    <Button variant="outline" onClick={handleLogout}>Log Out</Button>
                     <Button
                       variant="outline"
-                      className="gap-1 md:hidden"
+                      onClick={togglePasswordChange}
+                      className="w-full sm:w-auto min-h-[44px]"
+                    >
+                      Change Password
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleLogout}
+                      className="w-full sm:w-auto min-h-[44px]"
+                    >
+                      Log Out
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="gap-1 text-sm sm:text-base w-full sm:w-auto min-h-[44px] sm:hidden"
                       onClick={handleEditClick}
                     >
                       <Pencil className="h-4 w-4" />
@@ -487,11 +497,13 @@ export default function BuyerProfile() {
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6">
               {showPasswordChange ? (
-                <form className="grid gap-6" onSubmit={handlePasswordSubmit}>
+                <form className="grid gap-4 sm:gap-6" onSubmit={handlePasswordSubmit}>
                   <div className="grid gap-2">
-                    <Label htmlFor="old-password">Current Password</Label>
+                    <Label htmlFor="old-password" className="text-sm sm:text-base">
+                      Current Password
+                    </Label>
                     <div className="relative">
                       <Input
                         id="old-password"
@@ -502,24 +514,27 @@ export default function BuyerProfile() {
                           handlePasswordChange("oldPassword", e.target.value)
                         }
                         required
+                        className="text-sm sm:text-base pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
                         onClick={() => setShowOldPassword(!showOldPassword)}
                       >
                         {showOldPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-5 w-5" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-5 w-5" />
                         )}
                       </Button>
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="new-password">New Password</Label>
+                    <Label htmlFor="new-password" className="text-sm sm:text-base">
+                      New Password
+                    </Label>
                     <div className="relative">
                       <Input
                         id="new-password"
@@ -530,18 +545,19 @@ export default function BuyerProfile() {
                           handlePasswordChange("newPassword", e.target.value)
                         }
                         required
+                        className="text-sm sm:text-base pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
                         onClick={() => setShowNewPassword(!showNewPassword)}
                       >
                         {showNewPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-5 w-5" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-5 w-5" />
                         )}
                       </Button>
                     </div>
@@ -549,7 +565,7 @@ export default function BuyerProfile() {
                   <div className="flex justify-end">
                     <Button
                       type="submit"
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700 w-full sm:w-auto min-h-[44px]"
                       disabled={passwordMutation.isPending}
                     >
                       {passwordMutation.isPending && (
@@ -561,12 +577,14 @@ export default function BuyerProfile() {
                 </form>
               ) : (
                 <form
-                  className="grid gap-6"
+                  className="grid gap-4 sm:gap-6"
                   onSubmit={(e) => e.preventDefault()}
                 >
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="full-name">Full Name</Label>
+                      <Label htmlFor="full-name" className="text-sm sm:text-base">
+                        Full Name
+                      </Label>
                       <Input
                         id="full-name"
                         placeholder="Enter your full name"
@@ -575,10 +593,13 @@ export default function BuyerProfile() {
                           handleInputChange("name", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="username">User name</Label>
+                      <Label htmlFor="username" className="text-sm sm:text-base">
+                        User name
+                      </Label>
                       <Input
                         id="username"
                         placeholder="Enter your username"
@@ -589,12 +610,15 @@ export default function BuyerProfile() {
                           handleInputChange("username", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="text-sm sm:text-base">
+                        Email
+                      </Label>
                       <Input
                         id="email"
                         type="email"
@@ -604,10 +628,13 @@ export default function BuyerProfile() {
                           handleInputChange("email", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone" className="text-sm sm:text-base">
+                        Phone Number
+                      </Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -617,11 +644,14 @@ export default function BuyerProfile() {
                           handleInputChange("phone", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address" className="text-sm sm:text-base">
+                      Address
+                    </Label>
                     <Input
                       id="address"
                       placeholder="Enter your address"
@@ -634,11 +664,14 @@ export default function BuyerProfile() {
                         handleInputChange("address.street", e.target.value)
                       }
                       disabled={!isEditing}
+                      className="text-sm sm:text-base"
                     />
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                     <div className="grid gap-2">
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city" className="text-sm sm:text-base">
+                        City
+                      </Label>
                       <Input
                         id="city"
                         placeholder="Enter your city"
@@ -651,10 +684,13 @@ export default function BuyerProfile() {
                           handleInputChange("address.city", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="state">State</Label>
+                      <Label htmlFor="state" className="text-sm sm:text-base">
+                        State
+                      </Label>
                       <Input
                         id="state"
                         placeholder="Enter your state"
@@ -667,10 +703,13 @@ export default function BuyerProfile() {
                           handleInputChange("address.state", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="zip">Zip Code</Label>
+                      <Label htmlFor="zip" className="text-sm sm:text-base">
+                        Zip Code
+                      </Label>
                       <Input
                         id="zip"
                         placeholder="Enter your zip code"
@@ -683,20 +722,22 @@ export default function BuyerProfile() {
                           handleInputChange("address.zipCode", e.target.value)
                         }
                         disabled={!isEditing}
+                        className="text-sm sm:text-base"
                       />
                     </div>
                   </div>
                   {isEditing && (
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 flex-col sm:flex-row">
                       <Button
                         variant="outline"
                         onClick={handleCancel}
                         disabled={updateMutation.isPending}
+                        className="w-full sm:w-auto min-h-[44px]"
                       >
                         Cancel
                       </Button>
                       <Button
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 w-full sm:w-auto min-h-[44px]"
                         onClick={handleSave}
                         disabled={updateMutation.isPending}
                       >
