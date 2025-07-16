@@ -21,6 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { MapContainer, TileLayer, Circle, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+
 interface Product {
   _id: string;
   title: string;
@@ -218,6 +221,12 @@ export default function FarmPage() {
   const farm = data.data.farm;
   const products = data.data.product;
 
+  if (typeof farm.latitude !== "number" || typeof farm.longitude !== "number") {
+    return <p>Invalid coordinates provided for the map.</p>;
+  }
+
+  const position: [number, number] = [farm.latitude, farm.longitude];
+
   const averageRating =
     farm.review.length > 0
       ? farm.review.reduce((sum, review) => sum + review.rating, 0) /
@@ -262,7 +271,7 @@ export default function FarmPage() {
                 <div className="flex items-center gap-1 text-gray-600">
                   <MapPin className="w-4 h-4 text-[#039B06] flex-shrink-0" />
                   <span className="text-sm sm:text-base">
-                   {farm.location.city}, {farm.location.state}
+                    {farm.location.city}, {farm.location.state}
                   </span>
                 </div>
               </div>
@@ -302,18 +311,35 @@ export default function FarmPage() {
               </div>
             </div>
           </div>
-          <div className="w-full lg:w-96 xl:w-[450px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
+          <div className="w-full lg:w-[600px] lg:h-[300px] rounded-lg overflow-hidden border border-gray-200 ">
             {farm.latitude && farm.longitude ? (
-              <iframe
-                width="100%"
-                height="100%"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${farm.latitude},${farm.longitude}`}
-                className="w-full h-full"
-                aria-label={`Map of ${farm.name}`}
-              />
+              <div className="w-full h-[450px]">
+                <MapContainer
+                  center={position}
+                  zoom={11}
+                  scrollWheelZoom={false}
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+
+                  <Marker position={position}>
+                    <Popup>{farm.name}</Popup>
+                  </Marker>
+
+                  <Circle
+                    center={position}
+                    radius={1000} // radius in meters (e.g. 1000 = 1km)
+                    pathOptions={{
+                      fillColor: "blue",
+                      color: "blue",
+                      fillOpacity: 0.2,
+                    }}
+                  />
+                </MapContainer>
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500 text-sm sm:text-base">
                 Map not available
@@ -431,8 +457,10 @@ export default function FarmPage() {
                         <Star className="w-4 h-4 fill-[#FACC15] text-[#FACC15]" />
                         <span className="text-sm sm:text-base text-gray-900">
                           {(
-                            product.review.reduce((acc, r) => acc + r.rating, 0) /
-                              product.review.length || 0
+                            product.review.reduce(
+                              (acc, r) => acc + r.rating,
+                              0
+                            ) / product.review.length || 0
                           ).toFixed(1)}
                         </span>
                         <span className="text-xs sm:text-sm text-gray-600">
