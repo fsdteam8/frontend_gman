@@ -1,18 +1,29 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
+import dynamic from "next/dynamic"
 import FarmsCard from "./sheard/FramsCarda" // Assuming this path is correct
-
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge" // Added Badge import
-import { ChevronLeft, ChevronRight, Star } from "lucide-react" // Added Star import
-
+import { Badge } from "@/components/ui/badge"
+import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import Add_Banner from "./Add_Banner" // Assuming this path is correct
+import { useMap } from "react-leaflet"
+
+
+
+
+
+
+// Dynamically import map components to avoid SSR issues
+const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false })
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false })
+const Circle = dynamic(() => import("react-leaflet").then((mod) => mod.Circle), { ssr: false })
+const CircleMarker = dynamic(() => import("react-leaflet").then((mod) => mod.CircleMarker), { ssr: false }) // Re-added CircleMarker
 
 interface Location {
   street: string
@@ -22,7 +33,6 @@ interface Location {
 }
 
 interface FarmImage {
-  // Renamed to avoid conflict with ProductImage
   public_id: string
   url: string
   _id: string
@@ -55,6 +65,8 @@ interface Farm {
   location?: Location
   review?: Review[]
   profileImage?: string
+  longitude?: number
+  latitude?: number
   createdAt: string
   updatedAt: string
   __v?: number
@@ -74,7 +86,6 @@ interface ApiResponse {
   }
 }
 
-// New interfaces for Products
 interface ProductImage {
   public_id: string
   url: string
@@ -103,7 +114,7 @@ interface Product {
   description?: string
   media: ProductImage[]
   farm: string
-  status: "active" | "inactive" | "out_of_stock" 
+  status: "active" | "inactive" | "out_of_stock"
   code: string
   review: ProductReview[]
   createdAt: string
@@ -117,28 +128,145 @@ interface ProductApiResponse {
   data: Product[]
 }
 
+// Component to handle auto-fitting bounds
+const AutoFitBounds = ({ farms }: { farms: Farm[] }) => {
+  const map = useMap()
+
+  useEffect(() => {
+    const farmsWithCoordinates = farms.filter(
+      (farm) =>
+        farm.longitude !== undefined && farm.latitude !== undefined && !isNaN(farm.longitude) && !isNaN(farm.latitude),
+    )
+
+    if (farmsWithCoordinates.length > 0) {
+      if (farmsWithCoordinates.length === 1) {
+        // Single farm - center on it with reasonable zoom
+        const farm = farmsWithCoordinates[0]
+        map.setView([farm.latitude!, farm.longitude!], 11)
+      } else {
+        // Multiple farms - fit bounds to show all
+        const bounds = farmsWithCoordinates.map((farm) => [farm.latitude!, farm.longitude!] as [number, number])
+        map.fitBounds(bounds, {
+          padding: [20, 20], // Add padding around the bounds
+          maxZoom: 15, // Don't zoom in too much
+        })
+      }
+    }
+  }, [farms, map])
+
+  return null
+}
+
+// Map component for displaying farms
+const FarmsMap = ({ farms }: { farms: Farm[] }) => {
+  // Filter farms that have coordinates
+  const farmsWithCoordinates = farms.filter(
+    (farm) =>
+      farm.longitude !== undefined && farm.latitude !== undefined && !isNaN(farm.longitude) && !isNaN(farm.latitude),
+  )
+
+  // Default center (you can adjust this based on your needs)
+  const defaultCenter: [number, number] = [34.0522, -118.2437] // Los Angeles coordinates
+
+  // Calculate center based on farms or use default
+  const mapCenter: [number, number] =
+    farmsWithCoordinates.length > 0
+      ? [
+          farmsWithCoordinates.reduce((sum, farm) => sum + farm.latitude!, 0) / farmsWithCoordinates.length,
+          farmsWithCoordinates.reduce((sum, farm) => sum + farm.longitude!, 0) / farmsWithCoordinates.length,
+        ]
+      : defaultCenter
+
+  if (typeof window === "undefined") {
+    return (
+      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+        <p>Loading map...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-full h-full">
+      <MapContainer
+        center={mapCenter}
+        zoom={farmsWithCoordinates.length === 1 ? 11 : 6} // Start with lower zoom for multiple farms
+        scrollWheelZoom={true}
+        style={{ height: "100%", width: "100%" }}
+        className="rounded-lg"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {/* Auto-fit bounds component */}
+        <AutoFitBounds farms={farms} />
+
+        {farmsWithCoordinates.map((farm) => (
+          <div key={farm._id}>
+            {/* CircleMarker - fixed pixel radius, always visible as a central dot */}
+            <CircleMarker
+              center={[farm.latitude!, farm.longitude!]}
+              radius={8} // Adjust radius for desired dot size
+              pathOptions={{
+                fillColor: "#16a34a", // Darker green fill
+                color: "#16a34a", // Same color border
+                fillOpacity: 0.8, // Solid fill
+                weight: 1, // Thin border
+              }}
+            >
+              <Popup>
+                <div className="p-2">
+                  <h3 className="font-semibold text-sm mb-1">{farm.name}</h3>
+                  <p className="text-xs text-gray-600 mb-1">
+                    {farm.location?.city}, {farm.location?.state}
+                  </p>
+                  <p className="text-xs">{farm.description}</p>
+                  {farm.isOrganic && <Badge className="mt-1 text-xs bg-green-100 text-green-800">Organic</Badge>}
+                </div>
+              </Popup>
+            </CircleMarker>
+
+            {/* Circle - geographic radius, shows service area when zoomed in */}
+            <Circle
+              center={[farm.latitude!, farm.longitude!]}
+              radius={1000} // 1km radius in meters
+              pathOptions={{
+                fillColor: "#22c55e", // Green fill
+                color: "#16a34a", // Darker green border
+                fillOpacity: 0.2, // Slightly more opaque fill
+                weight: 2, // Border thickness
+              }}
+            />
+          </div>
+        ))}
+      </MapContainer>
+    </div>
+  )
+}
+
 const Featured_Farms = () => {
   const [currentPage, setCurrentPage] = useState(1)
-  const limit = 8 // Show 8 farms per page
+  const limit = 8
   const { data: session } = useSession()
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
   const categoryId = searchParams.get("category")
 
-  // Sync searchTerm with URL changes and reset page for both search and category
+  // Check if we should show the split layout (when there's a search term)
+  const showSplitLayout = !!searchTerm
+
   useEffect(() => {
     setSearchTerm(searchParams.get("search") || "")
-    setCurrentPage(1) // Reset to page 1 when search term or category changes
+    setCurrentPage(1)
   }, [searchParams])
 
-  // Helper function to calculate average rating for any review array
   const calculateAverageRating = (reviews: { rating: number }[] = []) => {
     if (reviews.length === 0) return 0
     const sum = reviews.reduce((total, review) => total + review.rating, 0)
     return sum / reviews.length
   }
 
-  // Query for Farms
   const {
     data: farmsData,
     isLoading: isLoadingFarms,
@@ -176,10 +304,9 @@ const Featured_Farms = () => {
       }
       return result
     },
-    enabled: !categoryId, // Only fetch farms if no categoryId is present
+    enabled: !categoryId,
   })
 
-  // Query for Products by Category
   const {
     data: productsData,
     isLoading: isLoadingProducts,
@@ -211,17 +338,15 @@ const Featured_Farms = () => {
       }
       return result
     },
-    enabled: !!categoryId, // Only fetch products if categoryId is present
+    enabled: !!categoryId,
   })
 
   const isCategoryView = !!categoryId
 
-  // Helper function to get first letter of farm name
   const getFirstLetter = (name: string) => {
     return name.charAt(0).toUpperCase()
   }
 
-  // Helper function to render farms with banner ad after first 4 cards
   const renderFarmsWithAds = (farms: Farm[]) => {
     const items = []
     const firstFourFarms = farms.slice(0, 4)
@@ -251,10 +376,7 @@ const Featured_Farms = () => {
       )
     })
 
-    if (farms.length > 4) {
-      // The original logic for Add_Banner vs DummyBanner was based on `farms.length` which is always true here.
-      // Assuming there's a more specific condition for Add_Banner vs DummyBanner,
-      // for now, I'll just use Add_Banner as it was the first condition.
+    if (farms.length > 4 && !showSplitLayout) {
       items.push(
         <div key="banner-ad" className="col-span-full mb-6">
           <Add_Banner />
@@ -283,14 +405,13 @@ const Featured_Farms = () => {
         />,
       )
     })
+
     return items
   }
 
-  // Helper function to generate page numbers
   const generatePageNumbers = () => {
     const pageNumbers = []
     const totalPage = farmsData?.data.pagination.totalPage || 0
-
     for (let i = 1; i <= totalPage; i++) {
       if (i === 1 || i === totalPage || (i >= currentPage - 1 && i <= currentPage + 1)) {
         pageNumbers.push(i)
@@ -298,11 +419,9 @@ const Featured_Farms = () => {
         pageNumbers.push("...")
       }
     }
-
     return pageNumbers
   }
 
-  // Determine current loading and error states
   const currentIsLoading = isCategoryView ? isLoadingProducts : isLoadingFarms
   const currentError = isCategoryView ? errorProducts : errorFarms
 
@@ -316,7 +435,9 @@ const Featured_Farms = () => {
           className={`grid ${
             isCategoryView
               ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+              : showSplitLayout
+                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
           } gap-6`}
         >
           {[...Array(isCategoryView ? 10 : 8)].map((_, index) => (
@@ -357,14 +478,16 @@ const Featured_Farms = () => {
 
   const farms = farmsData?.data.farm || []
   const products = productsData?.data || []
-  const pagination = farmsData?.data.pagination // Pagination only applies to farms
+  const pagination = farmsData?.data.pagination
 
   return (
     <section className="container mx-auto px-4 md:px-2 py-12 mt-[40px] md:mt-[100px]">
       <div>
         <h2 className="text-3xl text-[#272727] font-semibold mb-8">
           {isCategoryView ? "Products by Category" : "Featured Farms"}
+          {searchTerm && <span className="text-lg text-gray-600 ml-2">- Search results for &ldquo;{searchTerm}&rdquo;</span>}
         </h2>
+
         {isCategoryView ? (
           // Product Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
@@ -417,8 +540,112 @@ const Featured_Farms = () => {
               </div>
             )}
           </div>
+        ) : showSplitLayout ? (
+          // Split Layout: Farms on left, Map on right
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left side - Farms */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {farms.length > 0 ? (
+                  farms.map((farm) => {
+                    const hasProfileImage = farm.seller?.avatar?.url || farm.profileImage
+                    return (
+                      <FarmsCard
+                        key={farm._id}
+                        id={farm._id}
+                        name={farm.name || "Farm Name"}
+                        location={farm.location?.city || "Unknown city"}
+                        street={farm.location?.street || "Unknown street"}
+                        state={farm.location?.state || "Unknown state"}
+                        image={farm.images?.[0]?.url || "/placeholder.svg?height=260&width=320"}
+                        profileImage={
+                          hasProfileImage
+                            ? farm.seller?.avatar?.url || farm.profileImage || "/placeholder.svg?height=260&width=320"
+                            : "/placeholder.svg?height=50&width=50&text=" +
+                              encodeURIComponent(getFirstLetter(farm.name || "F"))
+                        }
+                        description={farm.description || "No description available"}
+                        rating={calculateAverageRating(farm.review)}
+                      />
+                    )
+                  })
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <p className="text-gray-600 text-lg">
+                      {searchTerm ? "Farm not found" : "No farms available at the moment."}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination for Split Layout */}
+              {pagination && pagination.totalPage > 1 && (
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                    {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0 border border-green-600"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {generatePageNumbers().map((page, index) => (
+                      <div key={index}>
+                        {page === "..." ? (
+                          <span className="px-2 py-1 text-sm text-gray-500">...</span>
+                        ) : (
+                          <Button
+                            variant={currentPage === page ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page as number)}
+                            className={`h-8 w-8 p-0 ${
+                              currentPage === page
+                                ? "bg-green-600 hover:bg-green-700 text-white"
+                                : "hover:bg-gray-100 border border-green-600"
+                            }`}
+                          >
+                            {page}
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(pagination.totalPage, currentPage + 1))}
+                      disabled={currentPage === pagination.totalPage}
+                      className="h-8 w-8 p-0 border border-green-600"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right side - Map */}
+            <div className="lg:sticky lg:top-4">
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden" style={{ height: "600px" }}>
+                <div className="p-4 bg-gray-50 border-b">
+                  <h3 className="text-lg font-semibold text-gray-800">Farm Locations</h3>
+                  <p className="text-sm text-gray-600">
+                    {farms.filter((f) => f.longitude && f.latitude).length} farms with location data
+                  </p>
+                </div>
+                <div className="h-full">
+                  <FarmsMap farms={farms} />
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
-          // Farm Grid
+          // Regular Farm Grid (no search)
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {farms.length > 0 ? (
@@ -431,7 +658,8 @@ const Featured_Farms = () => {
                 </div>
               )}
             </div>
-            {/* Pagination for Farms */}
+
+            {/* Pagination for Regular Layout */}
             {pagination && pagination.totalPage > 1 && (
               <div className="flex items-center justify-between mt-12">
                 <div className="text-sm text-gray-600">
@@ -458,7 +686,9 @@ const Featured_Farms = () => {
                           size="sm"
                           onClick={() => setCurrentPage(page as number)}
                           className={`h-8 w-8 p-0 ${
-                            currentPage === page ? "bg-green-600 hover:bg-green-700 text-white" : "hover:bg-gray-100 border border-green-600"
+                            currentPage === page
+                              ? "bg-green-600 hover:bg-green-700 text-white"
+                              : "hover:bg-gray-100 border border-green-600"
                           }`}
                         >
                           {page}

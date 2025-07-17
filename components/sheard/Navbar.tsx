@@ -690,10 +690,10 @@ export function Navbar() {
   };
 
   const handleDonateClick = () => {
-    if (!isLoggedIn) {
-      router.push("/login");
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   router.push("/login");
+    //   return;
+    // }
     setIsDonationModalOpen(true);
     setIsMenuOpen(false);
   };
