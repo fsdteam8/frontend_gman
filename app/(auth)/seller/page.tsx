@@ -34,6 +34,9 @@ export default function SellerPage() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
+  // Add a new state to track if the form was submitted without a location
+  const [locationError, setLocationError] = useState<string | null>(null);
+
   const router = useRouter();
 
   // Ensure code runs only on client side
@@ -103,6 +106,7 @@ export default function SellerPage() {
     setIsMapOpen(false);
   };
 
+  // Existing handleSubmit function with location validation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.farmName) {
@@ -113,6 +117,13 @@ export default function SellerPage() {
       toast.error("Seller registration ID is required");
       return;
     }
+    if (latitude === null || longitude === null || !placeName) {
+      toast.error("Please select your farm location");
+      setLocationError(
+        "Please select your farm location using the Map button."
+      );
+      return;
+    }
     setIsLoading(true);
     try {
       const submitData = new FormData();
@@ -120,13 +131,10 @@ export default function SellerPage() {
       submitData.append("description", formData.description);
       submitData.append("isOrganic", formData.isOrganic.toString());
       submitData.append("id", sellerRegisterId);
-      if (latitude !== null && longitude !== null) {
-        submitData.append("latitude", latitude.toString());
-        submitData.append("longitude", longitude.toString());
-      }
-      if (placeName) {
-        submitData.append("placeName", placeName);
-      }
+      submitData.append("latitude", latitude.toString());
+      submitData.append("longitude", longitude.toString());
+      submitData.append("placeName", placeName);
+
       images.forEach((image) => {
         submitData.append("media", image);
       });
@@ -178,7 +186,7 @@ export default function SellerPage() {
 
   return (
     <div>
-      <Navbar/>
+      <Navbar />
       <div className="bg-gray-50 py-12">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="bg-white rounded-lg shadow-md p-8">
@@ -281,14 +289,28 @@ export default function SellerPage() {
               </div>
               <div className="space-y-2">
                 <Label>Farm Location</Label>
-                {placeName && (
-                  <p className="text-sm text-gray-600 mt-2">{placeName}</p>
+                {placeName ? (
+                  <p className="text-sm text-gray-600 mt-2 text-center">
+                    {placeName}
+                  </p>
+                ) : (
+                  <p
+                    className={`text-base text-center py-4 ${
+                      locationError ? "text-red-500" : "text-gray-600"
+                    }`}
+                  >
+                    {locationError ||
+                      "Click the Map button below to select your farm location."}
+                  </p>
                 )}
                 <div className="flex justify-center">
                   <Button
                     type="button"
                     className="w-[146px] h-[44px] bg-[#039B06] text-white hover:bg-[#039B06]"
-                    onClick={() => setIsMapOpen(true)}
+                    onClick={() => {
+                      setIsMapOpen(true);
+                      setLocationError(null); // Clear error when opening map
+                    }}
                   >
                     <MapPin />
                     Map
