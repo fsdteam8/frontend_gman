@@ -313,7 +313,7 @@ export default function FarmPage() {
               </div>
             </div>
           </div>
-          <div className="w-full lg:w-[600px] lg:h-[300px] rounded-lg overflow-hidden border border-gray-200 ">
+          <div className="w-full lg:w-[600px] lg:h-[300px] rounded-lg overflow-hidden border border-gray-200 z-10">
             {farm.latitude && farm.longitude ? (
               <div className="w-full h-[450px]">
                 <MapContainer
