@@ -406,6 +406,8 @@ export function ShoppingCart() {
     return response.json();
   };
 
+  // console.log(first)
+
   const removeFromCart = async (itemId: string): Promise<void> => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/cart/remove/${itemId}`,
@@ -500,6 +502,8 @@ export function ShoppingCart() {
 
   const cart = cartResponse?.data;
   const items = cart?.items || [];
+
+  console.log("IIIIIIIIIIIIIIII",items)
 
   // Extract farmId from the first item in the cart (or adjust logic if multiple farms are needed)
   const farmId = items.length > 0 ? items[0].farm?._id : null;
