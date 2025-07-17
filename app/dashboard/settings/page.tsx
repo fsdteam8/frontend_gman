@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import type React from "react";
@@ -66,6 +68,10 @@ interface PasswordChangeResponse {
 interface PasswordChangeData {
   oldPassword: string;
   newPassword: string;
+}
+
+interface StripeConnectResponse {
+  url: string;
 }
 
 export default function BuyerProfile() {
@@ -168,6 +174,25 @@ export default function BuyerProfile() {
     return response.json();
   };
 
+  const connectStripe = async (userId: string): Promise<StripeConnectResponse> => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/payment/connect`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to connect Stripe account");
+    }
+    return response.json();
+  };
+
   const {
     data: profileResponse,
     isLoading,
@@ -207,6 +232,16 @@ export default function BuyerProfile() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to change password");
+    },
+  });
+
+  const stripeMutation = useMutation({
+    mutationFn: connectStripe,
+    onSuccess: (data) => {
+      router.push(data.url);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to connect Stripe account");
     },
   });
 
@@ -320,6 +355,14 @@ export default function BuyerProfile() {
     passwordMutation.mutate(passwordData);
   };
 
+  const handleStripeConnect = () => {
+    if (profile?._id) {
+      stripeMutation.mutate(profile._id);
+    } else {
+      toast.error("User ID not found");
+    }
+  };
+
   const togglePasswordChange = () => {
     setShowPasswordChange(!showPasswordChange);
     if (isEditing) {
@@ -410,7 +453,19 @@ export default function BuyerProfile() {
 
   return (
     <div className="container mx-auto py-8 md:py-12">
-      <h1 className="mb-8 text-3xl font-bold">Profile</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="mb-8 text-3xl font-bold">Profile</h1>
+        <Button 
+          onClick={handleStripeConnect} 
+          disabled={stripeMutation.isPending}
+          className="bg-green-600 hover:bg-green-700 text-white font-bold h-[48px] px-4 rounded"
+        >
+          {stripeMutation.isPending && (
+            <Loader2 className="mr-2  not-first: w-4 animate-spin" />
+          )}
+          Add Stripe Account
+        </Button>
+      </div>
 
       <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-3">
@@ -704,7 +759,7 @@ export default function BuyerProfile() {
                         disabled={!isEditing}
                       />
                     </div>
-                    <div className="grid gap-2">
+                    MBS                    <div className="grid gap-2">
                       <Label htmlFor="zip">Zip Code</Label>
                       <Input
                         id="zip"
