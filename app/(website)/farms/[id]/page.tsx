@@ -220,12 +220,14 @@ export default function FarmPage() {
 
   const farm = data.data.farm;
   const products = data.data.product;
+  const position = [farm.latitude, farm.longitude] as [number, number];
 
-  if (typeof farm.latitude !== "number" || typeof farm.longitude !== "number") {
-    return <p>Invalid coordinates provided for the map.</p>;
-  }
 
-  const position: [number, number] = [farm.latitude, farm.longitude];
+  // if (typeof farm.latitude !== "number" || typeof farm.longitude !== "number") {
+  //   return <p>Invalid coordinates provided for the map.</p>;
+  // }
+
+  // const position: [number, number] = [farm.latitude, farm.longitude];
 
   const averageRating =
     farm.review.length > 0
