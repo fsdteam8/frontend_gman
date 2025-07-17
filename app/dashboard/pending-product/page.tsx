@@ -12,10 +12,10 @@ export default function ActiveProductsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={"Panding Product List"}
+        title={"Pending Product List"}
         breadcrumb={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Panding Product", href: "/dashboard/pending-product" },
+          { label: "Pending Product", href: "/dashboard/pending-product" },
           { label: "List" },
         ]}
         action={{
