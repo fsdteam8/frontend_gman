@@ -60,20 +60,6 @@ async function postReview({ review, rating, product, token }) {
   return response.json();
 }
 
-async function addToCart({ productId, quantity, token }) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cart/add`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ productId, quantity }),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to add to cart");
-  }
-  return response.json();
-}
 
 export default function Page() {
   const { id } = useParams();
@@ -89,6 +75,23 @@ export default function Page() {
   const token = session?.accessToken;
 
   const [farmId, setFarmId] = useState("");
+
+
+async function addToCart({ productId, quantity, token }) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cart/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ productId, quantity }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to add to cart");
+  }
+    await queryClient.invalidateQueries({ queryKey: ["cart"] });
+  return response.json();
+}
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["product", id],

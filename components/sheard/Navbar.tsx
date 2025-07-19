@@ -146,13 +146,14 @@ export function Navbar() {
   });
 
   // Fetch cart data
-  const { data: cart, isLoading: isCartLoading, error: cartError } = useQuery<
-    CartResponse,
-    Error
-  >({
+  const {
+    data: cart,
+    isLoading: isCartLoading,
+    error: cartError,
+  } = useQuery<CartResponse, Error>({
     queryKey: ["cart", token],
     queryFn: () => fetchCart(token),
-    enabled: isLoggedIn && !!token,
+    enabled: isLoggedIn && !!token && userRole === "user",
   });
 
   if (profileError) {
@@ -274,7 +275,11 @@ export function Navbar() {
                   <Link href="/messages" className="flex" aria-label="Messages">
                     <MessageCircle className="h-6 w-6 hover:text-[#039B06]" />
                   </Link>
-                  <Link href="/cart" className="relative flex items-center" aria-label="Shopping cart">
+                  <Link
+                    href="/cart"
+                    className="relative flex items-center"
+                    aria-label="Shopping cart"
+                  >
                     <ShoppingCart className="h-6 w-6 hover:text-[#039B06]" />
                     {isCartLoading ? (
                       <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#039B06] text-xs text-white">
@@ -413,7 +418,9 @@ export function Navbar() {
                 />
                 <div className="flex flex-col">
                   <div>
-                    <p className="text-[16px] font-semibold text-black">TABLE</p>
+                    <p className="text-[16px] font-semibold text-black">
+                      TABLE
+                    </p>
                     <p className="text-[16px] font-normal text-[#039B06]">
                       FRESH
                     </p>
@@ -432,9 +439,7 @@ export function Navbar() {
                 <X className="!w-[30px] !h-[30px]" />
               </Button>
             </div>
-
             कार्यक्रम
-
             <div className="p-6">
               <ul className="flex flex-col gap-4 mb-6">
                 {navLinks.map((link) => (

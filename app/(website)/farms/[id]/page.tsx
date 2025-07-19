@@ -135,7 +135,7 @@ export default function FarmPage() {
       });
       const data = await response.json();
       if (data.success) {
-        router.push(`/messages/${data.data._id}`);
+        router.push(`/messages/`);
         toast.success("Chat is opening...");
       } else {
         throw new Error(data.message || "Failed to create chat");
@@ -335,8 +335,8 @@ export default function FarmPage() {
                     center={position}
                     radius={1000} // radius in meters (e.g. 1000 = 1km)
                     pathOptions={{
-                      fillColor: "blue",
-                      color: "blue",
+                      fillColor: "green",
+                      color: "green",
                       fillOpacity: 0.2,
                     }}
                   />
@@ -429,8 +429,8 @@ export default function FarmPage() {
                       <Image
                         src={product.thumbnail?.url || "/placeholder.svg"}
                         alt={product.title}
-                        width={200}
-                        height={200}
+                        width={1000}
+                        height={1000}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                       />

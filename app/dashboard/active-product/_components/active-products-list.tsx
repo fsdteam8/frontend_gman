@@ -194,8 +194,8 @@ export function ActiveProductsList() {
                     <Image
                       src={product.thumbnail.url || "/placeholder.svg"}
                       alt={product.title}
-                      width={48}
-                      height={48}
+                      width={300}
+                      height={300}
                       className="rounded-md object-cover h-[60px] w-[100px]"
                     />
                     {product.title}

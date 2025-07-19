@@ -116,8 +116,8 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
           <div className="w-full">
             <Image
               src={image || "/placeholder.svg?height=260&width=320"}
-              width={320}
-              height={260}
+              width={600}
+              height={600}
               alt={name}
               className="w-full h-[200px] sm:h-[220px] md:h-[240px] lg:h-[260px] object-cover rounded-[24px] sm:rounded-[28px] md:rounded-[32px]"
             />
