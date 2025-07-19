@@ -23,6 +23,8 @@ export default function PageHeader({
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       />
 
