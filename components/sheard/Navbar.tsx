@@ -439,7 +439,6 @@ export function Navbar() {
                 <X className="!w-[30px] !h-[30px]" />
               </Button>
             </div>
-            कार्यक्रम
             <div className="p-6">
               <ul className="flex flex-col gap-4 mb-6">
                 {navLinks.map((link) => (
