@@ -119,7 +119,7 @@ export default function Searchbar({ searchParams }: SearchbarProps) {
       <div className="bg-white rounded-[50px] md:rounded-[50px] lg:rounded-[999px] shadow-lg sm:shadow-xl lg:shadow-2xl p-2 sm:p-3 md:p-4 ">
         <div className="flex gap-2 sm:gap-3 md:gap-4 lg:gap-6 items-stretch sm:items-center">
           {/* Where Section */}
-          <div className="flex-1 sm:border-r sm:border-gray-200 sm:pr-3 md:pr-4 lg:pr-6">
+          <div className="flex-1 sm:border-r sm:border-gray-200 sm:pr-3 md:pr-4 lg:pr-6 pl-4">
             <div className="space-y-1 sm:space-y-1.5">
               <label className="text-xs sm:text-sm font-semibold text-gray-900 uppercase sm:normal-case tracking-wide sm:tracking-normal hidden lg:block ml-4">
                 Where

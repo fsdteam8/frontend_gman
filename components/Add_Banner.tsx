@@ -1,84 +1,98 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { X } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
-import { Button } from "@/components/ui/button"
-import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 interface BannerAd {
-  _id: string
+  _id: string;
   thumbnail: {
-    public_id: string
-    url: string
-  }
-  createdAt: string
-  updatedAt: string
+    public_id: string;
+    url: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 async function fetchBanners(token: string): Promise<BannerAd[]> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/get-ads`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  const data = await response.json()
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/admin/get-ads`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const data = await response.json();
+  console.log("ssssssssssssss", data);
   if (!data.success) {
-    throw new Error(data.message || "Failed to fetch banners")
+    throw new Error(data.message || "Failed to fetch banners");
   }
-  return data.data
+  return data.data;
 }
 
 export default function Add_Banner() {
-  const [isVisible, setIsVisible] = useState(true)
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
-  
+  const [isVisible, setIsVisible] = useState(true);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
- 
   const session = useSession();
-   const token = session.data?.accessToken;
+  const token = session.data?.accessToken;
 
-  const { data: bannerAds = [], isLoading, error } = useQuery<BannerAd[], Error>({
+  const {
+    data: bannerAds = [],
+    isLoading,
+    error,
+  } = useQuery<BannerAd[], Error>({
     queryKey: ["banners", token],
     queryFn: () => fetchBanners(token || ""),
     enabled: !!token,
-  })
+  });
+
+  console.log(bannerAds);
 
   useEffect(() => {
     if (!api) {
-      return
+      return;
     }
 
-   
-    setCurrent(api.selectedScrollSnap() + 1)
+    setCurrent(api.selectedScrollSnap() + 1);
 
     api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1)
-    })
-  }, [api])
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
 
   useEffect(() => {
     if (!api) {
-      return
+      return;
     }
 
     const interval = setInterval(() => {
-      api.scrollNext()
-    }, 5000)
+      api.scrollNext();
+    }, 5000);
 
-    return () => clearInterval(interval)
-  }, [api])
+    return () => clearInterval(interval);
+  }, [api]);
 
   const scrollTo = (index: number) => {
-    api?.scrollTo(index)
-  }
+    api?.scrollTo(index);
+  };
 
-  if (!isVisible) return null
-  if (isLoading) return <div>Loading banners...</div>
-  if (error) return <div>Error loading banners: {error.message}</div>
-  if (bannerAds.length === 0) return <div>No banners available</div>
+  if (!isVisible) return null;
+  if (isLoading) return <div>Loading banners...</div>;
+  if (error) return <div>Error loading banners: {error.message}</div>;
+  if (bannerAds.length === 0) return <div>No banners available</div>;
+
+  console.log("BBBBBBBBBBBBBBB", bannerAds);
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg">
@@ -130,5 +144,5 @@ export default function Add_Banner() {
         ))}
       </div>
     </div>
-  )
+  );
 }
