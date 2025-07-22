@@ -10,6 +10,7 @@ declare module "next-auth" {
     };
     accessToken: string;
     refreshToken: string;
+    stripeAccountId?: string;
   }
 
   interface User {
@@ -18,6 +19,7 @@ declare module "next-auth" {
     farm: string;
     accessToken: string;
     refreshToken: string;
+    stripeAccountId?: string; // Optional, as it may not be present for all users
   }
 }
 
@@ -28,5 +30,6 @@ declare module "next-auth/jwt" {
     farm: string;
     accessToken: string;
     refreshToken: string;
+    stripeAccountId?: string; // Optional, as it may not be present for all users
   }
 }
