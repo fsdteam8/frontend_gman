@@ -25,13 +25,15 @@ interface Category {
   name: string;
 }
 
+interface Media {
+  url: string;
+  public_id?: string;
+}
+
 interface CreateProductFormProps {
   onClose: () => void;
   onSuccess: () => void;
   productId?: string;
-}
-interface Media {
-  url: string;
 }
 
 export function CreateProductForm({
@@ -50,18 +52,18 @@ export function CreateProductForm({
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
   const [media, setMedia] = useState<File[]>([]);
-  const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<
+    { url: string; public_id?: string }[]
+  >([]);
+  const [deletedMedia, setDeletedMedia] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingProduct, setFetchingProduct] = useState(false);
 
   const isEditing = !!productId;
   const router = useRouter();
-
   const session = useSession();
   const farmId = session.data?.user.farm;
   const token = session.data?.accessToken;
-
-  console.log(productId);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -96,8 +98,6 @@ export function CreateProductForm({
       );
       const data = await response.json();
 
-      console.log(data);
-
       if (data.success) {
         const product = data.data;
         setFormData({
@@ -112,7 +112,10 @@ export function CreateProductForm({
         }
         if (product.media && product.media.length > 0) {
           setMediaPreviews(
-            product.media?.map((mediaurl: Media) => mediaurl.url) || []
+            product.media.map((mediaItem: Media) => ({
+              url: mediaItem.url,
+              public_id: mediaItem.public_id,
+            }))
           );
         }
       }
@@ -155,7 +158,10 @@ export function CreateProductForm({
       files.forEach((file) => {
         const reader = new FileReader();
         reader.onload = () => {
-          setMediaPreviews((prev) => [...prev, reader.result as string]);
+          setMediaPreviews((prev) => [
+            ...prev,
+            { url: reader.result as string, public_id: undefined },
+          ]);
         };
         reader.readAsDataURL(file);
       });
@@ -164,6 +170,10 @@ export function CreateProductForm({
 
   const removeMediaImage = (index: number) => {
     setMedia((prev) => prev.filter((_, i) => i !== index));
+    const removedMedia = mediaPreviews[index];
+    if (removedMedia.public_id) {
+      setDeletedMedia((prev) => [...prev, removedMedia.public_id!]);
+    }
     setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -204,8 +214,12 @@ export function CreateProductForm({
 
       if (media.length > 0) {
         media.forEach((file) => {
-          formDataToSend.append(`media`, file);
+          formDataToSend.append("media", file);
         });
+      }
+
+      if (isEditing && deletedMedia.length > 0) {
+        formDataToSend.append("removeMedia", JSON.stringify(deletedMedia));
       }
 
       const url = isEditing
@@ -268,8 +282,6 @@ export function CreateProductForm({
     );
   }
 
-  console.log(formData);
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -280,7 +292,7 @@ export function CreateProductForm({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className=" grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-5 gap-4">
             <div className="col-span-3 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Product Name *</Label>
@@ -371,7 +383,7 @@ export function CreateProductForm({
                           className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                         >
                           <Image
-                            src={preview || "/placeholder.svg"}
+                            src={preview.url || "/placeholder.svg"}
                             alt={`Product image ${index + 1}`}
                             className="w-full h-32 object-cover"
                             width={150}

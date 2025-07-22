@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased bg-[#efefef]`}>
+      <body className={`${inter.variable} antialiased bg-[#F9F9F9]`}>
         <StripeProvider>
           <Providers>
             <AppProvider>

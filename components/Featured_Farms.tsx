@@ -376,7 +376,7 @@ const Featured_Farms = () => {
       )
     })
 
-    if (farms.length > 4 && !showSplitLayout) {
+    if (farms.length > 0 && !showSplitLayout) {
       items.push(
         <div key="banner-ad" className="col-span-full mb-6">
           <Add_Banner />

@@ -222,6 +222,8 @@ export function PendingProductsList({ onEdit }: PendingProductsListProps) {
     );
   }
 
+  console.log("PPPPPPPPPPPPPP",products)
+
   return (
     <>
       <Card className="shadow-none border-none bg-transparent">

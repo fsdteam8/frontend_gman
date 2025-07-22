@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import type React from "react";
@@ -19,12 +17,21 @@ import {
   EyeOff,
   Upload,
   Trash2,
+  ArrowRight,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+
+// Dynamically import UpdateFarm to avoid SSR issues
+const UpdateFarm = dynamic(() => import("./_components/updateFarm"), {
+  ssr: false,
+});
+
 
 interface Address {
   street: string;
@@ -52,6 +59,8 @@ interface ProfileData {
   uniqueId: string;
   createdAt: string;
   updatedAt: string;
+  isStripeOnboarded: boolean;
+  farm: string;
 }
 
 interface ApiResponse<T> {
@@ -174,7 +183,9 @@ export default function BuyerProfile() {
     return response.json();
   };
 
-  const connectStripe = async (userId: string): Promise<StripeConnectResponse> => {
+  const connectStripe = async (
+    userId: string
+  ): Promise<StripeConnectResponse> => {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/payment/connect`,
       {
@@ -246,6 +257,8 @@ export default function BuyerProfile() {
   });
 
   const profile = profileResponse?.data;
+
+  const farmId = profile?.farm;
 
   const handleEditClick = () => {
     if (!isEditing && profile) {
@@ -326,7 +339,12 @@ export default function BuyerProfile() {
   const handleSave = () => {
     updateMutation.mutate({
       ...formData,
-      avatar: selectedImage !== undefined ? selectedImage : profile?.avatar ? undefined : null,
+      avatar:
+        selectedImage !== undefined
+          ? selectedImage
+          : profile?.avatar
+          ? undefined
+          : null,
     });
   };
 
@@ -453,18 +471,33 @@ export default function BuyerProfile() {
 
   return (
     <div className="container mx-auto py-8 md:py-12">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <h1 className="mb-8 text-3xl font-bold">Profile</h1>
-        <Button 
-          onClick={handleStripeConnect} 
-          disabled={stripeMutation.isPending}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold h-[48px] px-4 rounded"
+        <div className="flex gap-4">
+          <div className="flex gap-4">
+            <UpdateFarm farmId={farmId || ""} />
+            <Button
+              onClick={handleStripeConnect}
+              disabled={stripeMutation.isPending}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold h-[48px] px-4 rounded"
+            >
+              {stripeMutation.isPending && (
+                <Loader2 className="mr-2 w-4 animate-spin" />
+              )}
+              {profile.isStripeOnboarded
+                ? "Stripe Connect"
+                : "Add Stripe Account"}
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div className="py-4 flex justify-end">
+        <Link
+          href="/dashboard/stripe"
+          className="text-green-600  flex items-center gap-2"
         >
-          {stripeMutation.isPending && (
-            <Loader2 className="mr-2  not-first: w-4 animate-spin" />
-          )}
-          Add Stripe Account
-        </Button>
+          Go to your stripe dashboard <ArrowRight />
+        </Link>
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
@@ -549,7 +582,9 @@ export default function BuyerProfile() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>
-                {showPasswordChange ? "Change Password" : "Personal Information"}
+                {showPasswordChange
+                  ? "Change Password"
+                  : "Personal Information"}
               </CardTitle>
               <div className="flex gap-2">
                 {showPasswordChange ? (
@@ -759,7 +794,7 @@ export default function BuyerProfile() {
                         disabled={!isEditing}
                       />
                     </div>
-                    MBS                    <div className="grid gap-2">
+                    <div className="grid gap-2">
                       <Label htmlFor="zip">Zip Code</Label>
                       <Input
                         id="zip"
