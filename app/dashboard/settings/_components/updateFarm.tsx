@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState, useMemo } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
+import type React from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -15,75 +15,81 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog"
-import { toast } from "sonner"
-import { Loader2, MapPin, X } from "lucide-react"
-import L from "leaflet"
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet"
-import "leaflet/dist/leaflet.css"
-import { useSession } from "next-auth/react"
-import Image from "next/image"
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Loader2, MapPin, X } from "lucide-react";
+import L from "leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 // Constants
-const API_BASE_URL = "https://gman54-backend.onrender.com/api/v1"
-const MAX_IMAGES = 5
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const API_BASE_URL = "https://gman54-backend.onrender.com/api/v1";
+const MAX_IMAGES = 5;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+
+// Create a type for the Leaflet Icon prototype with the _getIconUrl property
+type LeafletIconPrototype = {
+  _getIconUrl?: string;
+} & typeof L.Icon.Default.prototype;
 
 // Fix Leaflet marker icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl
+delete (L.Icon.Default.prototype as LeafletIconPrototype)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-})
+  iconRetinaUrl: '/images/marker-icon-2x.png',
+  iconUrl: '/images/marker-icon.png',
+  shadowUrl: '/images/marker-shadow.png',
+});
 
 interface FarmData {
-  name: string
-  description: string
-  isOrganic: boolean
+  farmName: string;
+  description: string;
+  isOrganic: boolean;
   location: {
-    street: string
-    city: string
-    state: string
-    zipCode: string
-  }
-  latitude: number
-  longitude: number
-  media: Array<{ public_id: string; url: string; _id: string }>
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  latitude: number;
+  longitude: number;
+  media: Array<{ public_id: string; url: string; _id: string }>;
 }
 
 interface FarmResponse {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
   data: {
     farm: {
-      name: string
-      description: string
-      isOrganic: boolean
+      name: string;
+      description: string;
+      isOrganic: boolean;
       location: {
-        street: string
-        city: string
-        state: string
-        zipCode: string
-      }
-      _id: string
-      images: Array<{ public_id: string; url: string; _id: string }>
-      videos: any[]
-      seller: string
-      longitude: number
-      latitude: number
-      code: string
-      review: any[]
-      createdAt: string
-      updatedAt: string
-    }
-    product: any[]
-  }
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+      };
+      _id: string;
+      images: Array<{ public_id: string; url: string; _id: string }>;
+      videos: unknown[];
+      seller: string;
+      longitude: number;
+      latitude: number;
+      code: string;
+      review: unknown[];
+      createdAt: string;
+      updatedAt: string;
+    };
+    product: unknown[];
+  };
 }
 
 interface SelectedFileWithUrl {
-  file: File
-  url: string
+  file: File;
+  url: string;
 }
 
 const fetchFarmData = async (farmId: string, token: string): Promise<FarmResponse> => {
@@ -94,35 +100,22 @@ const fetchFarmData = async (farmId: string, token: string): Promise<FarmRespons
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    })
-
-    const contentType = response.headers.get("content-type")
-    const isJson = contentType && contentType.includes("application/json")
+    });
 
     if (!response.ok) {
-      if (isJson) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Failed to fetch farm data")
-      } else {
-        const text = await response.text()
-        throw new Error(
-          `Server error: ${response.status} ${response.statusText}. Response was not JSON: ${text.substring(0, 100)}`,
-        )
-      }
+      const text = await response.text();
+      throw new Error(`Failed to fetch farm data: ${text}`);
     }
 
-    if (isJson) {
-      return response.json()
-    } else {
-      const text = await response.text()
-      throw new Error(
-        `Expected JSON but got non-JSON response with status ${response.status}: ${text.substring(0, 100)}`,
-      )
+    const data = await response.json();
+    if (!data || typeof data !== "object") {
+      throw new Error("Invalid JSON response from server");
     }
+    return data;
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Network error occurred")
+    throw new Error(error instanceof Error ? error.message : "Network error occurred");
   }
-}
+};
 
 const updateFarmData = async ({
   farmId,
@@ -131,31 +124,30 @@ const updateFarmData = async ({
   deletedImagePublicIds,
   newImages,
 }: {
-  farmId: string
-  data: FarmData
-  token: string
-  deletedImagePublicIds: string[]
-  newImages: File[]
+  farmId: string;
+  data: FarmData;
+  token: string;
+  deletedImagePublicIds: string[];
+  newImages: File[];
 }) => {
-  const formDataToSend = new FormData()
-  formDataToSend.append("name", data.name.trim())
-  formDataToSend.append("description", data.description.trim())
-  formDataToSend.append("isOrganic", String(data.isOrganic))
-  formDataToSend.append("location[street]", data.location.street.trim())
-  formDataToSend.append("location[city]", data.location.city.trim())
-  formDataToSend.append("location[state]", data.location.state.trim())
-  formDataToSend.append("location[zipCode]", data.location.zipCode.trim())
-  formDataToSend.append("latitude", String(data.latitude))
-  formDataToSend.append("longitude", String(data.longitude))
+  const formDataToSend = new FormData();
+  formDataToSend.append("farmName", data.farmName.trim());
+  formDataToSend.append("description", data.description.trim());
+  formDataToSend.append("isOrganic", String(data.isOrganic));
+  formDataToSend.append("location[street]", data.location.street.trim());
+  formDataToSend.append("location[city]", data.location.city.trim());
+  formDataToSend.append("location[state]", data.location.state.trim());
+  formDataToSend.append("location[zipCode]", data.location.zipCode.trim());
+  formDataToSend.append("latitude", String(data.latitude));
+  formDataToSend.append("longitude", String(data.longitude));
 
   if (deletedImagePublicIds.length > 0) {
-    deletedImagePublicIds.forEach((publicId) => {
-      formDataToSend.append("removeImages", publicId)
-    })
+    formDataToSend.append("removeImages", JSON.stringify(deletedImagePublicIds));
   }
+
   newImages.forEach((file) => {
-    formDataToSend.append("media", file)
-  })
+    formDataToSend.append("media", file);
+  });
 
   try {
     const response = await fetch(`${API_BASE_URL}/seller/farm/update/${farmId}`, {
@@ -164,63 +156,51 @@ const updateFarmData = async ({
         Authorization: `Bearer ${token}`,
       },
       body: formDataToSend,
-    })
+    });
 
-    const contentType = response.headers.get("content-type")
-    const isJson = contentType && contentType.includes("application/json")
-
+    const text = await response.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
+    }
     if (!response.ok) {
-      if (isJson) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Failed to update farm")
-      } else {
-        const text = await response.text()
-        throw new Error(
-          `Server error: ${response.status} ${response.statusText}. Response was not JSON: ${text.substring(0, 100)}`,
-        )
-      }
+      throw new Error(data.message || `Failed to update farm: ${text}`);
     }
-
-    if (isJson) {
-      return response.json()
-    } else {
-      const text = await response.text()
-      throw new Error(
-        `Expected JSON but got non-JSON response with status ${response.status}: ${text.substring(0, 100)}`,
-      )
-    }
+    return data;
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Network error occurred")
+    throw new Error(error instanceof Error ? error.message : "Network error occurred");
   }
-}
+};
 
 const MapClickHandler: React.FC<{
-  setFormData: React.Dispatch<React.SetStateAction<FarmData>>
+  setFormData: React.Dispatch<React.SetStateAction<FarmData>>;
 }> = ({ setFormData }) => {
   useMapEvents({
     click(e) {
-      const lat = Math.max(-90, Math.min(90, e.latlng.lat))
-      const lng = Math.max(-180, Math.min(180, e.latlng.lng))
+      const lat = Math.max(-90, Math.min(90, e.latlng.lat));
+      const lng = Math.max(-180, Math.min(180, e.latlng.lng));
       setFormData((prev) => ({
         ...prev,
         latitude: lat,
         longitude: lng,
-      }))
+      }));
     },
-  })
-  return null
-}
+  });
+  return null;
+};
 
 interface UpdateFarmProps {
-  farmId: string
+  farmId: string;
 }
 
 const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isMapOpen, setIsMapOpen] = useState(false)
-  const [locationError, setLocationError] = useState<string | null>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FarmData>({
-    name: "",
+    farmName: "",
     description: "",
     isOrganic: false,
     location: {
@@ -232,15 +212,14 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
     latitude: 0,
     longitude: 0,
     media: [],
-  })
-  const [selectedFiles, setSelectedFiles] = useState<SelectedFileWithUrl[]>([])
-  const [deletedImagePublicIds, setDeletedImagePublicIds] = useState<string[]>([])
+  });
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFileWithUrl[]>([]);
+  const [deletedImagePublicIds, setDeletedImagePublicIds] = useState<string[]>([]);
 
-  const { data: session, status: sessionStatus } = useSession()
-  const token = session?.accessToken
-  const queryClient = useQueryClient()
+  const { data: session, status: sessionStatus } = useSession();
+  const token = session?.accessToken;
+  const queryClient = useQueryClient();
 
-  // Fetch farm data
   const {
     data: farmdata,
     isLoading,
@@ -248,19 +227,18 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
   } = useQuery<FarmResponse, Error>({
     queryKey: ["farm", farmId],
     queryFn: () => {
-      if (!farmId) throw new Error("Farm ID is missing")
-      if (!token) throw new Error("Authentication token missing")
-      return fetchFarmData(farmId, token)
+      if (!farmId) throw new Error("Farm ID is missing");
+      if (!token) throw new Error("Authentication token missing");
+      return fetchFarmData(farmId, token);
     },
     enabled: !!farmId && isOpen && !!token && sessionStatus === "authenticated",
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  })
+    staleTime: 5 * 60 * 1000,
+  });
 
-  // Reset form when dialog closes
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        name: "",
+        farmName: "",
         description: "",
         isOrganic: false,
         location: {
@@ -272,20 +250,18 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
         latitude: 0,
         longitude: 0,
         media: [],
-      })
-      // Revoke URLs for selected files when dialog closes
-      selectedFiles.forEach((item) => URL.revokeObjectURL(item.url))
-      setSelectedFiles([])
-      setDeletedImagePublicIds([])
-      setLocationError(null)
+      });
+      selectedFiles.forEach((item) => URL.revokeObjectURL(item.url));
+      setSelectedFiles([]);
+      setDeletedImagePublicIds([]);
+      setLocationError(null);
     }
-  }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
-  // Populate form with fetched data
   useEffect(() => {
     if (farmdata) {
       setFormData({
-        name: farmdata.data.farm.name || "",
+        farmName: farmdata.data.farm.name || "",
         description: farmdata.data.farm.description || "",
         isOrganic: farmdata.data.farm.isOrganic || false,
         location: {
@@ -297,156 +273,161 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
         latitude: farmdata.data.farm.latitude || 0,
         longitude: farmdata.data.farm.longitude || 0,
         media: farmdata.data.farm.images || [],
-      })
+      });
     }
-  }, [farmdata])
+  }, [farmdata]);
 
-  // Clean up object URLs for selected files on component unmount or selectedFiles change
   useEffect(() => {
-    const currentSelectedFiles = selectedFiles // Capture current state for cleanup closure
+    const currentSelectedFiles = selectedFiles;
     return () => {
-      currentSelectedFiles.forEach((item) => URL.revokeObjectURL(item.url))
-    }
-  }, [selectedFiles])
+      currentSelectedFiles.forEach((item) => URL.revokeObjectURL(item.url));
+    };
+  }, [selectedFiles]);
 
   const handleInputChange = (
     field: keyof FarmData | `location.${keyof FarmData["location"]}`,
     value: string | boolean | number,
   ) => {
     if (field.startsWith("location.")) {
-      const locationField = field.split(".")[1] as keyof FarmData["location"]
+      const locationField = field.split(".")[1] as keyof FarmData["location"];
       setFormData((prev) => ({
         ...prev,
         location: {
           ...prev.location,
           [locationField]: value,
         },
-      }))
+      }));
     } else {
       setFormData((prev) => ({
         ...prev,
         [field]: value,
-      }))
+      }));
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
+    const files = e.target.files;
     if (files) {
-      const newFilesWithUrls: SelectedFileWithUrl[] = []
+      const newFilesWithUrls: SelectedFileWithUrl[] = [];
       Array.from(files).forEach((file) => {
         if (formData.media.length + selectedFiles.length + newFilesWithUrls.length >= MAX_IMAGES) {
-          toast.error(`Cannot upload more than ${MAX_IMAGES} images`)
-          return
+          toast.error(`Cannot upload more than ${MAX_IMAGES} images`);
+          return;
         }
-        const isImage = file.type.startsWith("image/")
-        const isUnderSizeLimit = file.size <= MAX_FILE_SIZE
+        const isImage = file.type.startsWith("image/");
+        const isUnderSizeLimit = file.size <= MAX_FILE_SIZE;
         if (!isImage) {
-          toast.error(`${file.name} is not an image file`)
-          return
+          toast.error(`${file.name} is not an image file`);
+          return;
         }
         if (!isUnderSizeLimit) {
-          toast.error(`${file.name} exceeds 5MB size limit`)
-          return
+          toast.error(`${file.name} exceeds 5MB size limit`);
+          return;
         }
-        newFilesWithUrls.push({ file, url: URL.createObjectURL(file) })
-      })
-      setSelectedFiles((prev) => [...prev, ...newFilesWithUrls])
+        const url = URL.createObjectURL(file);
+        newFilesWithUrls.push({ file, url });
+      });
+      setSelectedFiles((prev) => [...prev, ...newFilesWithUrls]);
     }
-  }
+  };
 
-  const removeSelectedFile = (indexToRemove: number) => {
-    const fileToRemove = selectedFiles[indexToRemove]
-    URL.revokeObjectURL(fileToRemove.url) // Revoke URL immediately when removed
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== indexToRemove))
-  }
+  const removeSelectedFile = (index: number) => {
+    const fileToRemove = selectedFiles[index];
+    URL.revokeObjectURL(fileToRemove.url);
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  const removeImage = (public_id: string) => {
+  const removeImage = (index: number) => {
+    const removedImage = formData.media[index];
+    if (removedImage?.public_id) {
+      setDeletedImagePublicIds((prev) => [...prev, removedImage.public_id]);
+    }
     setFormData((prev) => ({
       ...prev,
-      media: prev.media.filter((image) => image.public_id !== public_id),
-    }))
-    setDeletedImagePublicIds((prev) => [...prev, public_id])
-  }
+      media: prev.media.filter((_, i) => i !== index),
+    }));
+  };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      toast.error("Farm name is required")
-      return false
+    if (!formData.farmName.trim()) {
+      toast.error("Farm name is required");
+      return false;
     }
     if (!formData.location.street.trim()) {
-      toast.error("Street address is required")
-      return false
+      toast.error("Street address is required");
+      return false;
     }
     if (!formData.location.city.trim()) {
-      toast.error("City is required")
-      return false
+      toast.error("City is required");
+      return false;
     }
     if (!formData.location.state.trim()) {
-      toast.error("State is required")
-      return false
+      toast.error("State is required");
+      return false;
     }
     if (!formData.location.zipCode.trim()) {
-      toast.error("Zip code is required")
-      return false
+      toast.error("Zip code is required");
+      return false;
     }
     if (formData.latitude < -90 || formData.latitude > 90) {
-      toast.error("Latitude must be between -90 and 90")
-      return false
+      toast.error("Latitude must be between -90 and 90");
+      return false;
     }
     if (formData.longitude < -180 || formData.longitude > 180) {
-      toast.error("Longitude must be between -180 and 180")
-      return false
+      toast.error("Longitude must be between -180 and 180");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!validateForm()) return;
     if (!farmId) {
-      toast.error("Farm ID is missing")
-      return
+      toast.error("Farm ID is missing");
+      return;
     }
     if (!token) {
-      toast.error("Authentication token missing")
-      return
+      toast.error("Authentication token missing");
+      return;
     }
     updateMutation.mutate({
       farmId,
       data: formData,
       token,
       deletedImagePublicIds,
-      newImages: selectedFiles.map((item) => item.file), // Pass only File objects to mutation
-    })
-  }
+      newImages: selectedFiles.map((item) => item.file),
+    });
+  };
 
   const updateMutation = useMutation({
     mutationFn: updateFarmData,
     onSuccess: () => {
-      toast.success("Farm updated successfully")
-      setIsOpen(false)
-      queryClient.invalidateQueries({ queryKey: ["farm", farmId] })
+      toast.success("Farm updated successfully");
+      setIsOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["farm", farmId] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to update farm")
+      toast.error(`Update failed: ${error.message}`);
     },
-  })
+  });
 
   const defaultMapCenter: [number, number] = useMemo(() => {
-    return formData.latitude !== 0 && formData.longitude !== 0 ? [formData.latitude, formData.longitude] : [0, 0]
-  }, [formData.latitude, formData.longitude])
+    return formData.latitude !== 0 && formData.longitude !== 0
+      ? [formData.latitude, formData.longitude]
+      : [0, 0];
+  }, [formData.latitude, formData.longitude]);
 
   if (sessionStatus === "loading") {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   if (sessionStatus === "unauthenticated" || !token) {
-    return <div className="text-red-500">Please log in to update your farm.</div>
+    return <div className="text-red-500">Please log in to update your farm.</div>;
   }
 
   return (
@@ -457,7 +438,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
             Update Farm
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-[90vh]">
+        <DialogContent className="sm:max-w-[800px] overflow-y-auto max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Update Farm</DialogTitle>
             <DialogDescription>Please fill in the form to update your farm.</DialogDescription>
@@ -471,11 +452,11 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Farm Name</Label>
+                <Label htmlFor="farmName">Farm Name</Label>
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  id="farmName"
+                  value={formData.farmName}
+                  onChange={(e) => handleInputChange("farmName", e.target.value)}
                   required
                 />
               </div>
@@ -601,7 +582,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                 <Label>Current Images</Label>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   {formData.media.length > 0 ? (
-                    formData.media.map((image) => (
+                    formData.media.map((image, index) => (
                       <div key={image._id} className="relative group">
                         <Image
                           src={image.url || "/placeholder.svg?height=200&width=200&query=farm-image-placeholder"}
@@ -610,8 +591,8 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                           width={200}
                           height={200}
                           onError={(e) => {
-                            e.currentTarget.src = "/placeholder.svg?height=200&width=200"
-                            toast.error(`Failed to load image ${image.public_id}`)
+                            e.currentTarget.src = "/placeholder.svg?height=200&width=200";
+                            toast.error(`Failed to load image ${image.public_id}`);
                           }}
                         />
                         <Button
@@ -619,7 +600,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                           variant="destructive"
                           size="sm"
                           className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
-                          onClick={() => removeImage(image.public_id)}
+                          onClick={() => removeImage(index)}
                           aria-label={`Remove image ${image.public_id}`}
                         >
                           <X className="h-4 w-4" />
@@ -636,8 +617,8 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   type="button"
                   className="w-[146px] h-[44px] bg-[#039B06] text-white hover:bg-[#039B06]"
                   onClick={() => {
-                    setIsMapOpen(true)
-                    setLocationError(null)
+                    setIsMapOpen(true);
+                    setLocationError(null);
                   }}
                 >
                   <MapPin className="mr-2 h-4 w-4" />
@@ -687,7 +668,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
         </DialogContent>
       </Dialog>
     </>
-  )
-}
+  );
+};
 
-export default UpdateFarm
+export default UpdateFarm;

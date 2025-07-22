@@ -25,7 +25,13 @@ import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import UpdateFarm from "./_components/updateFarm";
+import dynamic from "next/dynamic";
+
+// Dynamically import UpdateFarm to avoid SSR issues
+const UpdateFarm = dynamic(() => import("./_components/updateFarm"), {
+  ssr: false,
+});
+
 
 interface Address {
   street: string;
@@ -469,7 +475,7 @@ export default function BuyerProfile() {
         <h1 className="mb-8 text-3xl font-bold">Profile</h1>
         <div className="flex gap-4">
           <div className="flex gap-4">
-            <UpdateFarm farmId={farmId ?? ""} />
+            <UpdateFarm farmId={farmId || ""} />
             <Button
               onClick={handleStripeConnect}
               disabled={stripeMutation.isPending}
@@ -788,7 +794,6 @@ export default function BuyerProfile() {
                         disabled={!isEditing}
                       />
                     </div>
-                    MBS{" "}
                     <div className="grid gap-2">
                       <Label htmlFor="zip">Zip Code</Label>
                       <Input
