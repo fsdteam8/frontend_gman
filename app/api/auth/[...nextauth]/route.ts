@@ -36,7 +36,8 @@ const handler = NextAuth({
                 return {
                     id: user._id,
                     role: user.data.role,
-                    farm: user.data.user.farm, 
+                    farm: user.data.user.farm,
+                    stripeAccountId: user.data.user.stripeAccountId,
                     accessToken: user.data.accessToken,
                     refreshToken: user.data.refreshToken,
                 };
@@ -54,7 +55,8 @@ const handler = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
-                token.farm =  user.farm; 
+                token.farm =  user.farm;
+                token.stripeAccountId = user.stripeAccountId;
                 token.accessToken = user.accessToken;
                 token.refreshToken = user.refreshToken;
             }
@@ -68,6 +70,7 @@ const handler = NextAuth({
   }
 
   session.accessToken = token.accessToken as string;
+    session.stripeAccountId = token.stripeAccountId as string;
   session.refreshToken = token.refreshToken as string;
 
   return session;

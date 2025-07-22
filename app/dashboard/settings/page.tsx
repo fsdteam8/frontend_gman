@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,13 @@ import {
   Trash2,
   ArrowRight,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { signOut, useSession } from "next-auth/react";
@@ -31,7 +38,6 @@ import dynamic from "next/dynamic";
 const UpdateFarm = dynamic(() => import("./_components/updateFarm"), {
   ssr: false,
 });
-
 
 interface Address {
   street: string;
@@ -97,27 +103,36 @@ export default function BuyerProfile() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
-  const session = useSession();
-  const token = session.data?.accessToken;
+  const { data: session, status } = useSession();
+  const token = session?.accessToken;
   const router = useRouter();
 
-  const fetchProfile = async (): Promise<ApiResponse<ProfileData>> => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
+  // Ensure API URL is defined
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  if (!API_URL) {
+    throw new Error(
+      "NEXT_PUBLIC_API_URL is not defined in environment variables"
     );
+  }
+
+  const fetchProfile = async (): Promise<ApiResponse<ProfileData>> => {
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    const response = await fetch(`${API_URL}/user/profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
+      const errorData = await response.json();
       if (response.status === 401) {
         throw new Error("Unauthorized - Please login again");
       }
-      throw new Error("Failed to fetch profile");
+      throw new Error(errorData.message || "Failed to fetch profile");
     }
     return response.json();
   };
@@ -125,6 +140,9 @@ export default function BuyerProfile() {
   const updateProfile = async (
     profileData: Partial<ProfileData> & { avatar?: File | null }
   ): Promise<ApiResponse<ProfileData>> => {
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
     const formDataToSend = new FormData();
     formDataToSend.append("name", profileData.name || "");
     formDataToSend.append("username", profileData.username || "");
@@ -133,30 +151,30 @@ export default function BuyerProfile() {
     formDataToSend.append("city", profileData.address?.city || "");
     formDataToSend.append("state", profileData.address?.state || "");
     formDataToSend.append("zipCode", profileData.address?.zipCode || "");
+
+    // Only append avatar if a file is explicitly provided or null (to remove)
     if (profileData.avatar !== undefined) {
       if (profileData.avatar === null) {
-        formDataToSend.append("avatar", "");
+        formDataToSend.append("avatar", ""); // Send empty string to indicate avatar removal
       } else {
-        formDataToSend.append("avatar", profileData.avatar);
+        formDataToSend.append("avatar", profileData.avatar); // Append the file
       }
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/user/update-profile`,
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formDataToSend,
-      }
-    );
+    const response = await fetch(`${API_URL}/user/update-profile`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formDataToSend,
+    });
 
     if (!response.ok) {
+      const errorData = await response.json();
       if (response.status === 401) {
         throw new Error("Unauthorized - Please login again");
       }
-      throw new Error("Failed to update profile");
+      throw new Error(errorData.message || "Failed to update profile");
     }
     return response.json();
   };
@@ -164,17 +182,30 @@ export default function BuyerProfile() {
   const changePassword = async (
     passwordData: PasswordChangeData
   ): Promise<PasswordChangeResponse> => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(passwordData),
-      }
-    );
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    // Validate password complexity
+    if (passwordData.newPassword.length < 8) {
+      throw new Error("New password must be at least 8 characters long");
+    }
+    if (!/[A-Z]/.test(passwordData.newPassword)) {
+      throw new Error(
+        "New password must contain at least one uppercase letter"
+      );
+    }
+    if (!/[0-9]/.test(passwordData.newPassword)) {
+      throw new Error("New password must contain at least one number");
+    }
+
+    const response = await fetch(`${API_URL}/auth/change-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(passwordData),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -186,20 +217,45 @@ export default function BuyerProfile() {
   const connectStripe = async (
     userId: string
   ): Promise<StripeConnectResponse> => {
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+    const response = await fetch(`${API_URL}/payment/connect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to connect Stripe account");
+    }
+    return response.json();
+  };
+
+  const fetchStripeLoginLink = async (
+    userId: string
+  ): Promise<{ url: string }> => {
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/payment/connect`,
+      `${API_URL}/payment/stripe-login-link/${userId}`,
       {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId }),
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to connect Stripe account");
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch Stripe login link");
     }
     return response.json();
   };
@@ -211,6 +267,7 @@ export default function BuyerProfile() {
   } = useQuery({
     queryKey: ["profile"],
     queryFn: fetchProfile,
+    enabled: status === "authenticated" && !!token,
   });
 
   const updateMutation = useMutation({
@@ -256,6 +313,13 @@ export default function BuyerProfile() {
     },
   });
 
+  const { data: stripeLoginLink, isLoading: isStripeLinkLoading } = useQuery({
+    queryKey: ["stripeLoginLink", profileResponse?.data?._id ?? ""],
+    queryFn: () => fetchStripeLoginLink(profileResponse?.data?._id ?? ""),
+    enabled:
+      !!profileResponse?.data?._id && profileResponse?.data?.isStripeOnboarded,
+  });
+
   const profile = profileResponse?.data;
 
   const farmId = profile?.farm;
@@ -271,9 +335,7 @@ export default function BuyerProfile() {
         avatar: profile.avatar,
       });
       setImagePreview(
-        profile.avatar && !(profile.avatar instanceof File)
-          ? profile.avatar.url
-          : null
+        profile.avatar && "url" in profile.avatar ? profile.avatar.url : null
       );
     }
     setIsEditing(!isEditing);
@@ -310,7 +372,7 @@ export default function BuyerProfile() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.includes("image/")) {
+      if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file.");
         return;
       }
@@ -335,17 +397,22 @@ export default function BuyerProfile() {
       fileInputRef.current.value = "";
     }
   };
-
   const handleSave = () => {
-    updateMutation.mutate({
-      ...formData,
-      avatar:
-        selectedImage !== undefined
-          ? selectedImage
-          : profile?.avatar
-          ? undefined
-          : null,
-    });
+    // Create a clean copy of the formData without avatar
+    const { ...rest } = formData;
+
+    // Create the updatedData with the correct avatar type
+    const updatedData: Partial<ProfileData> & { avatar?: File | null } = {
+      ...rest,
+      avatar: selectedImage ?? undefined, // Pass File | undefined
+    };
+
+    // If explicitly removing the image
+    if (selectedImage === null) {
+      updatedData.avatar = null;
+    }
+
+    updateMutation.mutate(updatedData);
   };
 
   const handleCancel = () => {
@@ -353,18 +420,21 @@ export default function BuyerProfile() {
     setFormData({});
     setSelectedImage(null);
     setImagePreview(null);
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await signOut({ redirect: false });
-      toast.success("Logged out successfully!");
-      router.push("/");
-    } catch (error) {
-      toast.error("Failed to log out: " + (error as Error).message);
+    if (confirm("Are you sure you want to log out?")) {
+      try {
+        await signOut({ redirect: false });
+        toast.success("Logged out successfully!");
+        router.push("/");
+      } catch (error) {
+        toast.error("Failed to log out: " + (error as Error).message);
+      }
     }
   };
 
@@ -394,7 +464,18 @@ export default function BuyerProfile() {
     }
   };
 
-  if (isLoading) {
+  const getInitials = useMemo(
+    () => (name: string) =>
+      name
+        .split(" ")
+        .map((word) => word.charAt(0))
+        .join("")
+        .toUpperCase()
+        .slice(0, 2),
+    []
+  );
+
+  if (status === "loading" || isLoading) {
     return (
       <div className="container mx-auto py-8 md:py-12">
         <h1 className="mb-8 text-3xl font-bold">Profile</h1>
@@ -449,7 +530,8 @@ export default function BuyerProfile() {
           <AlertDescription>
             {error.message.includes("Unauthorized")
               ? "Session expired. Please login again."
-              : "Failed to load profile data. Please try again later."}
+              : error.message ||
+                "Failed to load profile data. Please try again later."}
           </AlertDescription>
         </Alert>
       </div>
@@ -457,47 +539,110 @@ export default function BuyerProfile() {
   }
 
   if (!profile) {
-    return null;
+    return (
+      <div className="container mx-auto py-8 md:py-12">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Profile data not found. Please try again later.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  console.log("Profile from pppppppppppp", profile);
 
   return (
     <div className="container mx-auto py-8 md:py-12">
       <div className="flex items-center justify-between">
         <h1 className="mb-8 text-3xl font-bold">Profile</h1>
         <div className="flex gap-4">
-          <div className="flex gap-4">
-            <UpdateFarm farmId={farmId || ""} />
-            <Button
-              onClick={handleStripeConnect}
-              disabled={stripeMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold h-[48px] px-4 rounded"
-            >
-              {stripeMutation.isPending && (
-                <Loader2 className="mr-2 w-4 animate-spin" />
-              )}
-              {profile.isStripeOnboarded
-                ? "Stripe Connect"
-                : "Add Stripe Account"}
-            </Button>
-          </div>
+          <UpdateFarm farmId={farmId || ""} />
+          <Button
+            onClick={handleStripeConnect}
+            disabled={stripeMutation.isPending}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold h-[48px] px-4 rounded"
+            aria-label={
+              profile.isStripeOnboarded
+                ? "Manage Stripe account"
+                : "Add Stripe account"
+            }
+          >
+            {stripeMutation.isPending && (
+              <Loader2 className="mr-2 w-4 animate-spin" />
+            )}
+            {profile.isStripeOnboarded
+              ? "Allready added stripe"
+              : "Add Stripe Account"}
+          </Button>
+
+          <Dialog
+            open={profile.isStripeOnboarded === false}
+            onOpenChange={(open) => {
+              if (open) {
+                handleStripeConnect();
+              }
+            }}
+          >
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-lg">
+                  <div className="flex items-center justify-between gap-2 py-4">
+                    <p>Stripe Account Required</p>
+                    <Link
+                      href="/"
+                      className="flex items-center text-sm hover:text-green-600 gap-2 bg-green-200 rounded p-1 px-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Home
+                    </Link>
+                  </div>
+                </DialogTitle>
+                <DialogDescription>
+                  You don&apos;t have any associated Stripe account at the
+                  moment. Please add one to start receiving payments.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4">
+                <Button
+                  onClick={handleStripeConnect}
+                  disabled={stripeMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold h-[48px] px-4 rounded w-full"
+                  aria-label={
+                    profile.isStripeOnboarded
+                      ? "Manage Stripe account"
+                      : "Add Stripe account"
+                  }
+                >
+                  {stripeMutation.isPending && (
+                    <Loader2 className="mr-2 w-4 animate-spin" />
+                  )}
+                  {profile.isStripeOnboarded
+                    ? "Manage Stripe"
+                    : "Add Stripe Account"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <div className="py-4 flex justify-end">
-        <Link
-          href="/dashboard/stripe"
-          className="text-green-600  flex items-center gap-2"
-        >
-          Go to your stripe dashboard <ArrowRight />
-        </Link>
+        {isStripeLinkLoading ? (
+          <Skeleton className="h-6 w-48" />
+        ) : (
+          stripeLoginLink?.url && (
+            <Link
+              href={stripeLoginLink.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 flex items-center gap-2"
+              aria-label="Go to your Stripe dashboard"
+            >
+              Go to your Stripe dashboard <ArrowRight />
+            </Link>
+          )
+        )}
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
@@ -510,11 +655,12 @@ export default function BuyerProfile() {
                     <AvatarImage
                       src={
                         imagePreview ||
-                        (profile.avatar && !(profile.avatar instanceof File)
+                        (profile.avatar && "url" in profile.avatar
                           ? profile.avatar.url
-                          : "/placeholder.svg?height=64&width=64")
+                          : undefined) ||
+                        "/placeholder.svg?height=64&width=64"
                       }
-                      alt={`@${profile.username}`}
+                      alt={`@${profile.username}'s profile image`}
                     />
                     <AvatarFallback>{getInitials(profile.name)}</AvatarFallback>
                   </Avatar>
@@ -525,6 +671,7 @@ export default function BuyerProfile() {
                       size="icon"
                       className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                       onClick={handleRemoveImage}
+                      aria-label="Remove profile image"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -542,9 +689,10 @@ export default function BuyerProfile() {
                   variant="outline"
                   className="gap-1"
                   onClick={handleEditClick}
+                  aria-label={isEditing ? "Cancel editing" : "Edit profile"}
                 >
                   <Pencil className="h-4 w-4" />
-                  Edit
+                  {isEditing ? "Cancel" : "Edit"}
                 </Button>
               )}
             </CardHeader>
@@ -560,6 +708,7 @@ export default function BuyerProfile() {
                       onChange={handleImageChange}
                       ref={fileInputRef}
                       className="w-auto"
+                      aria-label="Upload profile image"
                     />
                     <Button
                       type="button"
@@ -567,6 +716,7 @@ export default function BuyerProfile() {
                       onClick={() => {
                         fileInputRef.current?.click();
                       }}
+                      aria-label="Trigger file upload"
                     >
                       <Upload className="h-4 w-4 mr-2" />
                       Upload Image
@@ -588,25 +738,38 @@ export default function BuyerProfile() {
               </CardTitle>
               <div className="flex gap-2">
                 {showPasswordChange ? (
-                  <Button variant="outline" onClick={togglePasswordChange}>
+                  <Button
+                    variant="outline"
+                    onClick={togglePasswordChange}
+                    aria-label="Back to profile"
+                  >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Profile
                   </Button>
                 ) : (
                   <>
-                    <Button variant="outline" onClick={togglePasswordChange}>
+                    <Button
+                      variant="outline"
+                      onClick={togglePasswordChange}
+                      aria-label="Change password"
+                    >
                       Change Password
                     </Button>
-                    <Button variant="outline" onClick={handleLogout}>
+                    <Button
+                      variant="outline"
+                      onClick={handleLogout}
+                      aria-label="Log out"
+                    >
                       Log Out
                     </Button>
                     <Button
                       variant="outline"
                       className="gap-1 md:hidden"
                       onClick={handleEditClick}
+                      aria-label={isEditing ? "Cancel editing" : "Edit profile"}
                     >
                       <Pencil className="h-4 w-4" />
-                      Edit
+                      {isEditing ? "Cancel" : "Edit"}
                     </Button>
                   </>
                 )}
@@ -627,6 +790,7 @@ export default function BuyerProfile() {
                           handlePasswordChange("oldPassword", e.target.value)
                         }
                         required
+                        aria-label="Current password"
                       />
                       <Button
                         type="button"
@@ -634,6 +798,11 @@ export default function BuyerProfile() {
                         size="icon"
                         className="absolute right-2 top-1/2 -translate-y-1/2"
                         onClick={() => setShowOldPassword(!showOldPassword)}
+                        aria-label={
+                          showOldPassword
+                            ? "Hide current password"
+                            : "Show current password"
+                        }
                       >
                         {showOldPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -655,6 +824,7 @@ export default function BuyerProfile() {
                           handlePasswordChange("newPassword", e.target.value)
                         }
                         required
+                        aria-label="New password"
                       />
                       <Button
                         type="button"
@@ -662,6 +832,11 @@ export default function BuyerProfile() {
                         size="icon"
                         className="absolute right-2 top-1/2 -translate-y-1/2"
                         onClick={() => setShowNewPassword(!showNewPassword)}
+                        aria-label={
+                          showNewPassword
+                            ? "Hide new password"
+                            : "Show new password"
+                        }
                       >
                         {showNewPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -676,6 +851,7 @@ export default function BuyerProfile() {
                       type="submit"
                       className="bg-green-600 hover:bg-green-700"
                       disabled={passwordMutation.isPending}
+                      aria-label="Change password"
                     >
                       {passwordMutation.isPending && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -700,6 +876,7 @@ export default function BuyerProfile() {
                           handleInputChange("name", e.target.value)
                         }
                         disabled={!isEditing}
+                        aria-label="Full name"
                       />
                     </div>
                     <div className="grid gap-2">
@@ -714,6 +891,7 @@ export default function BuyerProfile() {
                           handleInputChange("username", e.target.value)
                         }
                         disabled={!isEditing}
+                        aria-label="Username"
                       />
                     </div>
                   </div>
@@ -728,7 +906,8 @@ export default function BuyerProfile() {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        disabled={!isEditing}
+                        disabled
+                        aria-label="Email address"
                       />
                     </div>
                     <div className="grid gap-2">
@@ -742,6 +921,7 @@ export default function BuyerProfile() {
                           handleInputChange("phone", e.target.value)
                         }
                         disabled={!isEditing}
+                        aria-label="Phone number"
                       />
                     </div>
                   </div>
@@ -759,6 +939,7 @@ export default function BuyerProfile() {
                         handleInputChange("address.street", e.target.value)
                       }
                       disabled={!isEditing}
+                      aria-label="Street address"
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-3">
@@ -776,6 +957,7 @@ export default function BuyerProfile() {
                           handleInputChange("address.city", e.target.value)
                         }
                         disabled={!isEditing}
+                        aria-label="City"
                       />
                     </div>
                     <div className="grid gap-2">
@@ -792,6 +974,7 @@ export default function BuyerProfile() {
                           handleInputChange("address.state", e.target.value)
                         }
                         disabled={!isEditing}
+                        aria-label="State"
                       />
                     </div>
                     <div className="grid gap-2">
@@ -808,6 +991,7 @@ export default function BuyerProfile() {
                           handleInputChange("address.zipCode", e.target.value)
                         }
                         disabled={!isEditing}
+                        aria-label="Zip code"
                       />
                     </div>
                   </div>
@@ -817,6 +1001,7 @@ export default function BuyerProfile() {
                         variant="outline"
                         onClick={handleCancel}
                         disabled={updateMutation.isPending}
+                        aria-label="Cancel editing"
                       >
                         Cancel
                       </Button>
@@ -824,6 +1009,7 @@ export default function BuyerProfile() {
                         className="bg-green-600 hover:bg-green-700"
                         onClick={handleSave}
                         disabled={updateMutation.isPending}
+                        aria-label="Save profile changes"
                       >
                         {updateMutation.isPending && (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

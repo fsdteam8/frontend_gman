@@ -3,41 +3,57 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
-    const token = await getToken({
-        req: request,
-        secret: process.env.NEXTAUTH_SECRET,
-    });
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
-    const publicRoutes = ["/login","/forgot-password","/update-password","/verify-otp"];
+  console.log("TTTTTTTTTTTTTTTTTT", token);
 
-    const isPublicRoute = publicRoutes.some((route) =>
-        pathname.startsWith(route)
-    );
+  const publicRoutes = [
+    "/login",
+    "/forgot-password",
+    "/update-password",
+    "/verify-otp",
+  ];
 
-    const isStatic = pathname.startsWith("/_next") || pathname.includes(".");
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
-    // Redirect unauthenticated users trying to access protected routes
-    // if (!token && !isPublicRoute && !isStatic) {
-    //     return NextResponse.redirect(new URL("/login", request.url));
-    // }
+  const isStatic = pathname.startsWith("/_next") || pathname.includes(".");
 
-    // Redirect authenticated users away from public routes
-    if (token && isPublicRoute) {
-        return NextResponse.redirect(new URL("/", request.url));
+  // Redirect unauthenticated users trying to access protected routes
+  // if (!token && !isPublicRoute && !isStatic) {
+  //     return NextResponse.redirect(new URL("/login", request.url));
+  // }
+
+  // Redirect authenticated users away from public routes
+  if (token && isPublicRoute) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Restrict /dashboard to sellers only
+  if (pathname.startsWith("/dashboard")) {
+    if (!token || token.role !== "seller") {
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Restrict /dashboard to admin only
-    if (pathname.startsWith("/dashboard")) {
-        if (!token || token.role !== "seller") {
-            return NextResponse.redirect(new URL("/", request.url)); // Or use a /403 page
-        }
-    }
+    const isOnSettingsPage = pathname === "/dashboard/settings";
 
-    return NextResponse.next();
+    if (
+      !isOnSettingsPage &&
+      (!token.stripeAccountId || token.stripeAccountId === "")
+    ) {
+      return NextResponse.redirect(new URL("/dashboard/settings", request.url));
+    }
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
