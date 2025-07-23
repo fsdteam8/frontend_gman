@@ -255,7 +255,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
       setDeletedImagePublicIds([]);
       setLocationError(null);
     }
-  }, [isOpen]);
+  }, [ selectedFiles, isOpen]);
 
   useEffect(() => {
     if (farmdata) {
