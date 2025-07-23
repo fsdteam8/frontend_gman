@@ -404,7 +404,7 @@ export default function BuyerProfile() {
     // Create the updatedData with the correct avatar type
     const updatedData: Partial<ProfileData> & { avatar?: File | null } = {
       ...rest,
-      avatar: selectedImage ?? undefined, // Pass File | undefined
+      avatar: selectedImage ?? undefined, 
     };
 
     // If explicitly removing the image
