@@ -29,7 +29,6 @@ const API_BASE_URL = "https://gman54-backend.onrender.com/api/v1";
 const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-
 type LeafletIconPrototype = {
   _getIconUrl?: string;
 } & typeof L.Icon.Default.prototype;
@@ -255,7 +254,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
       setDeletedImagePublicIds([]);
       setLocationError(null);
     }
-  }, [ selectedFiles, isOpen]);
+  }, [isOpen]); // Removed `selectedFiles` from the dependency array
 
   useEffect(() => {
     if (farmdata) {
@@ -450,7 +449,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
             <div className="text-red-500 p-4 bg-red-100 rounded-md">Error: {error.message}</div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="farmName">Farm Name</Label>
                 <Input
                   id="farmName"
@@ -459,7 +458,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   required
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
@@ -476,7 +475,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                 <Label htmlFor="isOrganic">Organic</Label>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="location.street">Street</Label>
                   <Input
                     id="location.street"
@@ -485,7 +484,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     required
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="location.city">City</Label>
                   <Input
                     id="location.city"
@@ -494,7 +493,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     required
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="location.state">State</Label>
                   <Input
                     id="location.state"
@@ -503,7 +502,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     required
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="location.zipCode">Zip Code</Label>
                   <Input
                     id="location.zipCode"
@@ -512,7 +511,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     required
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="latitude">Latitude</Label>
                   <Input
                     id="latitude"
@@ -522,7 +521,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     onChange={(e) => handleInputChange("latitude", Number.parseFloat(e.target.value) || 0)}
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="longitude">Longitude</Label>
                   <Input
                     id="longitude"
@@ -533,7 +532,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   />
                 </div>
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="images">
                   Upload New Images (Max {MAX_IMAGES - formData.media.length - selectedFiles.length})
                 </Label>

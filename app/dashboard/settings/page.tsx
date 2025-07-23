@@ -186,17 +186,10 @@ export default function BuyerProfile() {
       throw new Error("No authentication token found");
     }
     // Validate password complexity
-    if (passwordData.newPassword.length < 8) {
-      throw new Error("New password must be at least 8 characters long");
+    if (passwordData.newPassword.length < 6) {
+      throw new Error("New password must be at least 6 characters long");
     }
-    if (!/[A-Z]/.test(passwordData.newPassword)) {
-      throw new Error(
-        "New password must contain at least one uppercase letter"
-      );
-    }
-    if (!/[0-9]/.test(passwordData.newPassword)) {
-      throw new Error("New password must contain at least one number");
-    }
+    
 
     const response = await fetch(`${API_URL}/auth/change-password`, {
       method: "POST",
@@ -551,7 +544,7 @@ export default function BuyerProfile() {
     );
   }
 
-  console.log("Profile from pppppppppppp", profile);
+
 
   return (
     <div className="container mx-auto py-8 md:py-12">
