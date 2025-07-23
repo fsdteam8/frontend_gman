@@ -30,7 +30,6 @@ const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 
-// Create a type for the Leaflet Icon prototype with the _getIconUrl property
 type LeafletIconPrototype = {
   _getIconUrl?: string;
 } & typeof L.Icon.Default.prototype;
