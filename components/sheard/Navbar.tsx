@@ -224,6 +224,7 @@ export function Navbar() {
     setIsDonationModalOpen(false);
     setIsAmitModalOpen(true);
   };
+  const userId1 = profile ? profile.data._id : "";
 
   return (
     <>
@@ -585,13 +586,11 @@ export function Navbar() {
 
       <Dialog open={isAmitModalOpen} onOpenChange={setIsAmitModalOpen}>
         <DialogContent className="w-[90%] rounded-xl p-6 sm:p-8 text-center">
-          {profile?.data?._id && (
-            <CheckoutFormWrapper
-              userId={profile.data._id}
-              amount={amount as number}
-              type="donation"
-            />
-          )}
+          <CheckoutFormWrapper
+            userId={userId1}
+            amount={amount as number}
+            type="donation"
+          />
         </DialogContent>
       </Dialog>
     </>

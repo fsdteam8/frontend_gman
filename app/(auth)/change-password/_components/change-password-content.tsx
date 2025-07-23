@@ -37,8 +37,8 @@ export default function ResetPasswordcontent() {
       return;
     }
 
-    if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -148,7 +148,7 @@ export default function ResetPasswordcontent() {
                     }))
                   }
                   required
-                  minLength={8}
+                  minLength={6}
                 />
                 <button
                   type="button"
@@ -185,7 +185,7 @@ export default function ResetPasswordcontent() {
                     }))
                   }
                   required
-                  minLength={8}
+                  minLength={6}
                 />
                 <button
                   type="button"

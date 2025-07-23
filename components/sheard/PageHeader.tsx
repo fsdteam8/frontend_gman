@@ -17,7 +17,7 @@ export default function PageHeader({
     : `linear-gradient(rgba(${gradientColor}, ${gradientOpacity}), rgba(${gradientColor}, ${gradientOpacity}))`;
 
   return (
-    <section className="relative h-[300px] md:h-[660px] overflow-hidden">
+    <section className="relative h-[300px] md:h-[460px] lg:h-[660px] overflow-hidden">
       {/* Background Image with Linear Gradient Overlay */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

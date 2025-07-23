@@ -3,13 +3,13 @@ import { Card, CardContent } from "@/components/ui/card"
 
 export default function MissionTableFresh() {
   return (
-    <div className="mt-16 md:mt-[100px]">
+    <div className="pt-16 md:pt-24">
       {/* Header */}
-      <header className="text-center py-6 md:py-8 px-4">
+      <header className="text-center pb-6 md:pb-8 px-4">
         <h1 className="text-xl sm:text-2xl lg:text-[32px] font-semibold text-[#272727] mb-3 md:mb-4 leading-tight max-w-4xl mx-auto">
           Connecting People Through Food, Building Community Through Tradition
         </h1>
-        <p className="text-sm sm:text-base text-[#595959] font-normal max-w-2xl mx-auto px-2 md:px-4">
+        <p className="text-base sm:text-lg text-[#595959] font-normal max-w-2xl mx-auto px-2 md:px-4">
           Taking control from corporations and putting it back in the hands of the people, where it belongs.
         </p>
       </header>
@@ -40,7 +40,7 @@ export default function MissionTableFresh() {
 
           {/* Right Image */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-            <div className="w-full max-w-[636px] h-[250px] sm:h-[350px] md:h-[430px] overflow-hidden">
+            <div className="w-full  h-[250px] sm:h-[350px] md:h-[430px] overflow-hidden">
               <Image
                 src="/asset/mission1.jpg"
                 alt="Two farmers working in a garden with vegetables"
@@ -59,7 +59,7 @@ export default function MissionTableFresh() {
         <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-16 items-center">
           {/* Left Image */}
           <div className="flex justify-center lg:justify-start">
-            <div className="w-full max-w-[636px] h-[250px] sm:h-[350px] md:h-[430px] overflow-hidden">
+            <div className="w-full h-[250px] sm:h-[350px] md:h-[430px] overflow-hidden">
               <Image
                 src="/asset/mission2.jpg"
                 alt="Person working in greenhouse"
@@ -134,7 +134,7 @@ export default function MissionTableFresh() {
 
           {/* Right Image */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-            <div className="w-full max-w-[636px] h-[250px] sm:h-[350px] md:h-[430px] overflow-hidden">
+            <div className="w-full h-[250px] sm:h-[350px] md:h-[430px] overflow-hidden">
               <Image
                 src="/asset/mission1.jpg"
                 alt="Farmers working together in garden"

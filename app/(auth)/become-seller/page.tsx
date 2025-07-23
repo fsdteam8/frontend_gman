@@ -42,7 +42,7 @@ export default function BecomeSellerPage() {
 
           {/* Bakers */}
           <div className="flex flex-col">
-            <div className="order-2 md:order-1 mb-4">
+            <div className="order-2 md:order-1 mb-4 pt-2 md:pt-0">
               <p className="text-gray-700">
                 Bakers, whether you&apos;re a small bakery or baking artisan
                 baked goods from your kitchen, you&apos;re encouraged to sign up
@@ -87,7 +87,7 @@ export default function BecomeSellerPage() {
 
           {/* Orchards */}
           <div className="flex flex-col">
-            <div className="order-2 md:order-1 mb-4">
+            <div className="order-2 md:order-1 mb-4 pt-2 md:pt-0">
               <p className="text-gray-700">
                 Orchards growing apples, oranges, lemons, limes, pears, or any
                 other fruit can connect with customers. Sell your fresh produce

@@ -30,7 +30,7 @@ export default function Reasons() {
   ]
 
   return (
-    <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8 mt-[100px]">
+    <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8 md:mt-[100px]">
       <div className=" ">
         <h2 className="text-xl sm:text-[24px] lg:text-[24px] font-bold text-[#272727] ">
           Reasons to join tablefresh.

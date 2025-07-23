@@ -2,13 +2,13 @@ import Image from "next/image";
 
 export default function Aboutus() {
   return (
-    <section className="py-24">
+    <section className="pt-16 md:pt-24">
       {/* Hero Section */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-semibold text-[#272727] mb-4 leading-tight">
           Your Online Source for Fresh Food and Vegetables
         </h1>
-        <p className="text-2xl text-black font-normal max-w-2xl mx-auto px-4">
+        <p className="md:text-xl lg:text-2xl text-black font-normal max-w-2xl mx-auto px-4">
           Bringing local people together with fresh healthy food.
         </p>
       </section>
