@@ -98,7 +98,7 @@ export default function ContactForm() {
                 <div>
                   <h2 className="text-xl lg:text-2xl text-[#272727] font-semibold mb-4">Contact Information</h2>
                   <p className="text-[#595959] font-medium mb-8 sm:mb-12 lg:mb-[120px] text-sm sm:text-base">
-                    Say something to start a live chat!
+                    Contact Us at info@tablefresh.org
                   </p>
 
                   {/* <div className="space-y-6 lg:space-y-8">
