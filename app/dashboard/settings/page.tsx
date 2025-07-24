@@ -571,7 +571,7 @@ export default function BuyerProfile() {
           </Button>
 
           <Dialog
-            open={profile.isStripeOnboarded === false}
+            // open={profile.isStripeOnboarded === false}
             onOpenChange={(open) => {
               if (open) {
                 handleStripeConnect();
