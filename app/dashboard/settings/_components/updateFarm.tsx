@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
+  
   Dialog,
   DialogContent,
   DialogHeader,
@@ -36,9 +37,9 @@ type LeafletIconPrototype = {
 // Fix Leaflet marker icon issue
 delete (L.Icon.Default.prototype as LeafletIconPrototype)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/images/marker-icon-2x.png',
-  iconUrl: '/images/marker-icon.png',
-  shadowUrl: '/images/marker-shadow.png',
+  iconRetinaUrl: "/images/marker-icon-2x.png",
+  iconUrl: "/images/marker-icon.png",
+  shadowUrl: "/images/marker-shadow.png",
 });
 
 interface FarmData {
@@ -90,7 +91,10 @@ interface SelectedFileWithUrl {
   url: string;
 }
 
-const fetchFarmData = async (farmId: string, token: string): Promise<FarmResponse> => {
+const fetchFarmData = async (
+  farmId: string,
+  token: string
+): Promise<FarmResponse> => {
   try {
     const response = await fetch(`${API_BASE_URL}/user/farm/${farmId}`, {
       method: "GET",
@@ -111,7 +115,9 @@ const fetchFarmData = async (farmId: string, token: string): Promise<FarmRespons
     }
     return data;
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Network error occurred");
+    throw new Error(
+      error instanceof Error ? error.message : "Network error occurred"
+    );
   }
 };
 
@@ -140,7 +146,10 @@ const updateFarmData = async ({
   formDataToSend.append("longitude", String(data.longitude));
 
   if (deletedImagePublicIds.length > 0) {
-    formDataToSend.append("removeImages", JSON.stringify(deletedImagePublicIds));
+    formDataToSend.append(
+      "removeImages",
+      JSON.stringify(deletedImagePublicIds)
+    );
   }
 
   newImages.forEach((file) => {
@@ -148,13 +157,16 @@ const updateFarmData = async ({
   });
 
   try {
-    const response = await fetch(`${API_BASE_URL}/seller/farm/update/${farmId}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formDataToSend,
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/seller/farm/update/${farmId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+      }
+    );
 
     const text = await response.text();
     let data;
@@ -168,7 +180,9 @@ const updateFarmData = async ({
     }
     return data;
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Network error occurred");
+    throw new Error(
+      error instanceof Error ? error.message : "Network error occurred"
+    );
   }
 };
 
@@ -212,7 +226,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
     media: [],
   });
   const [selectedFiles, setSelectedFiles] = useState<SelectedFileWithUrl[]>([]);
-  const [deletedImagePublicIds, setDeletedImagePublicIds] = useState<string[]>([]);
+  const [deletedImagePublicIds, setDeletedImagePublicIds] = useState<string[]>(
+    []
+  );
 
   const { data: session, status: sessionStatus } = useSession();
   const token = session?.accessToken;
@@ -254,7 +270,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
       setDeletedImagePublicIds([]);
       setLocationError(null);
     }
-  }, [selectedFiles, isOpen]); // Removed `selectedFiles` from the dependency array
+  }, [isOpen]); // Removed `selectedFiles` from the dependency array
 
   useEffect(() => {
     if (farmdata) {
@@ -284,7 +300,7 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
 
   const handleInputChange = (
     field: keyof FarmData | `location.${keyof FarmData["location"]}`,
-    value: string | boolean | number,
+    value: string | boolean | number
   ) => {
     if (field.startsWith("location.")) {
       const locationField = field.split(".")[1] as keyof FarmData["location"];
@@ -308,7 +324,12 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
     if (files) {
       const newFilesWithUrls: SelectedFileWithUrl[] = [];
       Array.from(files).forEach((file) => {
-        if (formData.media.length + selectedFiles.length + newFilesWithUrls.length >= MAX_IMAGES) {
+        if (
+          formData.media.length +
+            selectedFiles.length +
+            newFilesWithUrls.length >=
+          MAX_IMAGES
+        ) {
           toast.error(`Cannot upload more than ${MAX_IMAGES} images`);
           return;
         }
@@ -425,7 +446,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
   }
 
   if (sessionStatus === "unauthenticated" || !token) {
-    return <div className="text-red-500">Please log in to update your farm.</div>;
+    return (
+      <div className="text-red-500">Please log in to update your farm.</div>
+    );
   }
 
   return (
@@ -439,14 +462,18 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
         <DialogContent className="sm:max-w-[800px] overflow-y-auto max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Update Farm</DialogTitle>
-            <DialogDescription>Please fill in the form to update your farm.</DialogDescription>
+            <DialogDescription>
+              Please fill in the form to update your farm.
+            </DialogDescription>
           </DialogHeader>
           {isLoading ? (
             <div className="flex justify-center">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : error ? (
-            <div className="text-red-500 p-4 bg-red-100 rounded-md">Error: {error.message}</div>
+            <div className="text-red-500 p-4 bg-red-100 rounded-md">
+              Error: {error.message}
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -454,7 +481,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                 <Input
                   id="farmName"
                   value={formData.farmName}
-                  onChange={(e) => handleInputChange("farmName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("farmName", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -463,14 +492,18 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="isOrganic"
                   checked={formData.isOrganic}
-                  onCheckedChange={(checked) => handleInputChange("isOrganic", checked)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("isOrganic", checked)
+                  }
                 />
                 <Label htmlFor="isOrganic">Organic</Label>
               </div>
@@ -480,7 +513,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   <Input
                     id="location.street"
                     value={formData.location.street}
-                    onChange={(e) => handleInputChange("location.street", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location.street", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -489,7 +524,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   <Input
                     id="location.city"
                     value={formData.location.city}
-                    onChange={(e) => handleInputChange("location.city", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location.city", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -498,7 +535,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   <Input
                     id="location.state"
                     value={formData.location.state}
-                    onChange={(e) => handleInputChange("location.state", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location.state", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -507,7 +546,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   <Input
                     id="location.zipCode"
                     value={formData.location.zipCode}
-                    onChange={(e) => handleInputChange("location.zipCode", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location.zipCode", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -518,7 +559,12 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     type="number"
                     step="any"
                     value={formData.latitude}
-                    onChange={(e) => handleInputChange("latitude", Number.parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "latitude",
+                        Number.parseFloat(e.target.value) || 0
+                      )
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -528,13 +574,19 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     type="number"
                     step="any"
                     value={formData.longitude}
-                    onChange={(e) => handleInputChange("longitude", Number.parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "longitude",
+                        Number.parseFloat(e.target.value) || 0
+                      )
+                    }
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="images">
-                  Upload New Images (Max {MAX_IMAGES - formData.media.length - selectedFiles.length})
+                  Upload New Images (Max{" "}
+                  {MAX_IMAGES - formData.media.length - selectedFiles.length})
                 </Label>
                 <Input
                   id="images"
@@ -543,12 +595,15 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   multiple
                   onChange={handleFileChange}
                   className="mt-2"
-                  disabled={formData.media.length + selectedFiles.length >= MAX_IMAGES}
+                  disabled={
+                    formData.media.length + selectedFiles.length >= MAX_IMAGES
+                  }
                 />
                 {selectedFiles.length > 0 && (
                   <div className="mt-2">
                     <p className="text-sm text-gray-600">
-                      Selected new images ({selectedFiles.length}/{MAX_IMAGES - formData.media.length}):
+                      Selected new images ({selectedFiles.length}/
+                      {MAX_IMAGES - formData.media.length}):
                     </p>
                     <div className="grid grid-cols-2 gap-4 mt-2">
                       {selectedFiles.map((item, index) => (
@@ -583,14 +638,20 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                     formData.media.map((image, index) => (
                       <div key={image._id} className="relative group">
                         <Image
-                          src={image.url || "/placeholder.svg?height=200&width=200&query=farm-image-placeholder"}
+                          src={
+                            image.url ||
+                            "/placeholder.svg?height=200&width=200&query=farm-image-placeholder"
+                          }
                           alt={`Farm image ${image.public_id}`}
                           className="w-full h-32 object-cover rounded"
                           width={200}
                           height={200}
                           onError={(e) => {
-                            e.currentTarget.src = "/placeholder.svg?height=200&width=200";
-                            toast.error(`Failed to load image ${image.public_id}`);
+                            e.currentTarget.src =
+                              "/placeholder.svg?height=200&width=200";
+                            toast.error(
+                              `Failed to load image ${image.public_id}`
+                            );
                           }}
                         />
                         <Button
@@ -624,7 +685,11 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                 </Button>
               </div>
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -632,7 +697,9 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
                   disabled={updateMutation.isPending}
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
-                  {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {updateMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Save
                 </Button>
               </div>
@@ -646,7 +713,11 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
             <DialogTitle>Select Farm Location</DialogTitle>
           </DialogHeader>
           <div className="h-[400px] overflow-y-auto">
-            <MapContainer center={defaultMapCenter} zoom={13} style={{ height: "100%", width: "100%" }}>
+            <MapContainer
+              center={defaultMapCenter}
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+            >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -659,7 +730,11 @@ const UpdateFarm: React.FC<UpdateFarmProps> = ({ farmId }) => {
             {locationError && <p className="text-red-500">{locationError}</p>}
           </div>
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setIsMapOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsMapOpen(false)}
+            >
               OK
             </Button>
           </div>
