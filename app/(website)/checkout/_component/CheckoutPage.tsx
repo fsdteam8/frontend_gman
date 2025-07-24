@@ -11,6 +11,13 @@ interface CheckoutFormWrapperProps {
   amount: number;
   type: string;
 }
+// Define a specific interface for the body object
+interface PaymentBody {
+  userId?: string;
+  orderId?: string;
+  price: number;
+  type: string;
+}
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
@@ -29,7 +36,7 @@ export default function CheckoutFormWrapper({
   } = useQuery({
     queryKey: ["create-payment-intent", userId, serviceId, amount, type],
     queryFn: async () => {
-      const body: Record<string, any> = {
+      const body: PaymentBody = {
         ...(userId ? { userId } : {}),
         orderId: serviceId,
         price: amount,
