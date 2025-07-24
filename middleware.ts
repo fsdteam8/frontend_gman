@@ -41,14 +41,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    const isOnSettingsPage = pathname === "/dashboard/settings";
+    // const isOnSettingsPage = pathname === "/dashboard/settings";
 
-    if (
-      !isOnSettingsPage &&
-      (!token.stripeAccountId || token.stripeAccountId === "")
-    ) {
-      return NextResponse.redirect(new URL("/dashboard/settings", request.url));
-    }
+    // if (
+    //   !isOnSettingsPage &&
+    //   (!token.stripeAccountId || token.stripeAccountId === "")
+    // ) {
+    //   return NextResponse.redirect(new URL("/dashboard/settings", request.url));
+    // }
   }
 
   return NextResponse.next();
