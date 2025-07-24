@@ -189,7 +189,6 @@ export default function BuyerProfile() {
     if (passwordData.newPassword.length < 6) {
       throw new Error("New password must be at least 6 characters long");
     }
-    
 
     const response = await fetch(`${API_URL}/auth/change-password`, {
       method: "POST",
@@ -397,7 +396,7 @@ export default function BuyerProfile() {
     // Create the updatedData with the correct avatar type
     const updatedData: Partial<ProfileData> & { avatar?: File | null } = {
       ...rest,
-      avatar: selectedImage ?? undefined, 
+      avatar: selectedImage ?? undefined,
     };
 
     // If explicitly removing the image
@@ -543,8 +542,6 @@ export default function BuyerProfile() {
       </div>
     );
   }
-
-
 
   return (
     <div className="container mx-auto py-8 md:py-12">
