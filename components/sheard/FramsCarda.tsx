@@ -152,7 +152,7 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
                   <div className="flex items-center gap-1">
                     <MapPin className="!w-[15px] !h-[20px] sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 lg:w-3 lg:h-3 flex-shrink-0 text-[#595959]" />
                     <p className="text-sm sm:text-base md:text-lg lg:text-base text-[#595959] font-normal truncate">
-                      {formattedLocation},{state} {street}
+                      {formattedLocation}, {state}
                     </p>
                   </div>
                 </div>
