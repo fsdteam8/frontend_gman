@@ -119,9 +119,9 @@ const fetchCart = async (token: string): Promise<CartResponse> => {
       "Content-Type": "application/json",
     },
   });
-  if (!response.ok) {
-    throw new Error("Failed to fetch cart");
-  }
+  // if (!response.ok) {
+  //   throw new Error("Failed to fetch cart");
+  // }
   return response.json();
 };
 
@@ -160,9 +160,9 @@ export function Navbar() {
     toast.error("Failed to fetch profile: " + profileError.message);
   }
 
-  if (cartError) {
-    toast.error("Failed to fetch cart: " + cartError.message);
-  }
+  // if (cartError) {
+  //   toast.error("Failed to fetch cart: " + cartError.message);
+  // }
 
   const navLinks = [
     { name: "Home", href: "/" },

@@ -117,7 +117,7 @@ async function addToCart({ productId, quantity, token }) {
   const cartMutation = useMutation({
     mutationFn: addToCart,
     onSuccess: () => {
-      toast.success("Effect added to cart successfully");
+      toast.success("Added to cart successfully");
     },
     onError: (error) => {
       console.error("Error adding to cart:", error.message);
