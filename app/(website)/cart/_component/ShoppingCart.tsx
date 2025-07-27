@@ -52,9 +52,9 @@ export function ShoppingCart() {
         "Content-Type": "application/json",
       },
     });
-    if (!response.ok) {
-      throw new Error("Failed to fetch cart");
-    }
+    // if (!response.ok) {
+    //   throw new Error("Failed to fetch cart");
+    // }
     return response.json();
   };
 
@@ -100,7 +100,6 @@ export function ShoppingCart() {
   const {
     data: cartResponse,
     isLoading,
-    error,
   } = useQuery({
     queryKey: ["cart"],
     queryFn: fetchCart,
@@ -264,13 +263,13 @@ export function ShoppingCart() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600">Error loading cart. Please try again.</p>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="text-center py-8">
+  //       <p className="text-red-600">Error loading cart. Please try again.</p>
+  //     </div>
+  //   );
+  // }
 
   const cart = cartResponse?.data;
   const items = cart?.items || [];

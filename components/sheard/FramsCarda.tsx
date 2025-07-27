@@ -32,7 +32,6 @@ const FarmsCard: React.FC<FarmsCardProps> = ({
   profileImage,
   description,
   rating,
-  street,
   state,
 }) => {
   const { data: session } = useSession();
